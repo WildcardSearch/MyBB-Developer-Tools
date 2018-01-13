@@ -7,7 +7,7 @@
  * wrapper to handle the plugin's cache
  */
 
-class DeveloperToolsCache extends WildcardPluginCache010200
+class DeveloperToolsCache extends WildcardPluginCache010300
 {
 	/**
 	 * @var  string cache key

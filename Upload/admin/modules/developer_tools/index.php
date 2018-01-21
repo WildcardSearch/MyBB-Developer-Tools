@@ -150,7 +150,7 @@ EOF;
 		file_put_contents(DEVELOPER_TOOLS_SANDBOX_FILE_PATH, $code);
 
 		flash_message('PHP code successfully executed.', 'success');
-		admin_redirect($html->url(array('action' => 'execute')) . '#tab_output');
+		admin_redirect($html->url(array('action' => 'execute')) . '#output');
 	}
 
 	$iframeSource = '';
@@ -163,6 +163,7 @@ EOF;
 	<link href="./jscripts/codemirror/lib/codemirror.css?ver=1813" rel="stylesheet">
 	<link href="./jscripts/developer_tools/codemirror/theme/blackboard.css" rel="stylesheet">
 	<link href="./jscripts/developer_tools/codemirror/addon/display/fullscreen.css" rel="stylesheet">
+	<link href="./styles/default/developer_tools/tabs.css" rel="stylesheet">
 
 	<script src="./jscripts/codemirror/lib/codemirror.js?ver=1813"></script>
 	<script src="./jscripts/developer_tools/codemirror/mode/clike/clike.js"></script>
@@ -174,9 +175,10 @@ EOF;
 	<script src="./jscripts/developer_tools/codemirror/addon/display/fullscreen.js"></script>
 	<script src="./jscripts/developer_tools/codemirror/addon/display/panel.js"></script>
 
+	<script src="./jscripts/developer_tools/tabs.js"></script>
 	<script src="./jscripts/developer_tools/PHiddle.js"></script>
 
-	<style>
+<style>
 iframe.outputFrame {
 	height: 500px;
 	width: 100%;
@@ -188,6 +190,7 @@ iframe.outputFrame {
 .CodeMirror {
 	font-size: 1.8em;
 	height: 400px;
+	padding: 7px 0px 0px 2px;
 }
 
 div.CodeMirror span.CodeMirror-matchingbracket {
@@ -201,65 +204,52 @@ div.CodeMirror span.CodeMirror-matchingbracket {
 	color: black;
 	font-weight: bold;
 }
-	</style>
 
+iframe {
+	border: none;
+}
+</style>
 EOF;
 
 	$page->add_breadcrumb_item($lang->developer_tools_admin_home);
 	$page->output_header($lang->developer_tools_admin_home);
 
-	$tabs = array(
-		"php" => $lang->developer_tools_phiddle_tab_php,
-		"output" => $lang->developer_tools_phiddle_tab_output,
-	);
-	$page->output_tab_control($tabs, true);
+	echo <<<EOF
+	<div id="quick_tab_main">
+		<li id="qt_link_main_php" name="php" class="quick_tab">
+			<a href="{$html->url()}#php">PHP</a>
+			<span style="display: none;">PHP</span>
+		</li>
+		<li id="qt_link_main_output" name="output" class="quick_tab">
+			<a href="{$html->url()}#output">Output</a>
+			<span style="display: none;">Output</span>
+		</li>
+EOF;
 
 	$form = new Form($html->url(), 'post');
 
 	echo <<<EOF
 
-	<div id="tab_php" style="width: auto;">
+	<div id="qt_body_main_php" name="php" class="quick_tab">
 
 EOF;
 
-	$formContainer = new FormContainer($lang->developer_tools_admin_home);
-
-	$formContainer->output_row('PHP Code Input', 'enter your PHP code here', $form->generate_text_area('php_code', $phpCode | ' ', array('rows' => 11, "columns" => 145, 'id' => 'php_code')));
-
-	$formContainer->end();
+	echo($form->generate_text_area('php_code', $phpCode | ' ', array('rows' => 11, "columns" => 145, 'id' => 'php_code')));
 
 	echo <<<EOF
 
-</div>
-<div id="tab_output" style="width: auto;">
-
+	</div>
+	<div id="qt_body_main_output" name="output" class="quick_tab">
+		<iframe src="{$iframeSource}" class="outputFrame"> </iframe>
+	</div>
 EOF;
-
-	$formContainer = new FormContainer($lang->developer_tools_admin_home);
-
-	$formContainer->output_row('PHP Code Input', 'enter your PHP code here', <<<EOF
-<iframe src="{$iframeSource}" class="outputFrame"> </iframe>
-EOF
-	);
-
-	$formContainer->end();
-
-	echo '</div>';
 
 	$buttons[] = $form->generate_submit_button($lang->developer_tools_module_execute, array('name' => 'execute_php'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
+	echo '</div>';
 	$page->output_footer();	
 }
-
-/* echo <<<EOF
-<div class="message">
-	<h2>{$lang->developer_tools}</h2>
-	<p>This module is intended to provide tools to assist in development and testing MyBB forum software, plugins, and themes.</p>
-	<p>Using various modules listed to the left, this plugin allows quick setup of a MyBB forum for the purposes of testing, be it in development, theme design, or SQA.</p>
-	<p>Follow the development of this project on <a href="">GitHub</a>
-</div>
-EOF; */
 
 ?>

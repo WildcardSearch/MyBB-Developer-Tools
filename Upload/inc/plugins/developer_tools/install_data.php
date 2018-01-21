@@ -29,6 +29,96 @@ $settings = array(
 	),
 );
 
+$styleSheets = array(
+	"folder" => 'developer_tools',
+	"acp" => array(
+		"global" => array(
+			"stylesheet" => <<<EOF
+/*
+ * Plugin Name: Developer Tools for MyBB 1.8.x
+ * Copyright 2018 WildcardSearch
+ * http://www.rantcentralforums.com
+ *
+ * this file contains global style information
+ */
+
+iframe.outputFrame {
+	height: 500px;
+	width: 100%;
+	overflow-y: auto;
+}
+	
+/* CodeMirror */
+
+.CodeMirror {
+	font-size: 1.8em;
+	height: 400px;
+	padding: 7px 0px 0px 2px;
+}
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+	outline: none;
+	color: #ffff4c !important;
+	font-weight: bold;
+}
+
+.cm-matchhighlight {
+	background-color: yellow;
+	color: black;
+	font-weight: bold;
+}
+
+iframe {
+	border: none;
+}
+EOF
+		),
+		"tabs" => array(
+			"stylesheet" => <<<EOF
+/*
+ * Plugin Name: Developer Tools for MyBB 1.8.x
+ * Copyright 2018 WildcardSearch
+ * http://www.rantcentralforums.com
+ *
+ * this file contains style rules for tabs
+ */
+
+div.quick_tab {
+	background: white;
+	color: black;
+	padding: 0px;
+	border: 1px solid gray;
+}
+
+li.quick_tab {
+	display: inline;
+	color: black;
+	font-size: 1.4em;
+	font-weight: bold;
+}
+
+li.quick_tab a {
+	color: black;
+	background: lightgrey;
+	padding: 5px 15px 0px 15px;
+	text-decoration: none;
+	border-radius: 3px 3px 0px 0px;
+	border-bottom: 1px solid gray;
+}
+
+li.quick_tab span {
+	background: white;
+	padding: 5px 15px 2px 15px;
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
+	border-top: 1px solid gray;
+	border-radius: 3px 3px 0px 0px;
+}
+EOF
+		),
+	),
+);
+
 $images = array(
 	'folder' => 'developer_tools',
 	'acp' => array(

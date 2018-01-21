@@ -120,7 +120,7 @@ exit;
  */
 function developer_tools_PHiddle()
 {
-	global $config, $mybb, $page, $html, $lang;
+	global $config, $mybb, $page, $html, $lang, $cp_style;
 
 	$myCache = DeveloperToolsCache::getInstance();
 	$codeArray = $myCache->read('php_code');
@@ -165,6 +165,9 @@ EOF;
 	<link href="./jscripts/developer_tools/codemirror/addon/display/fullscreen.css" rel="stylesheet">
 	<link href="./styles/default/developer_tools/tabs.css" rel="stylesheet">
 
+	<link href="./styles/{$cp_style}/developer_tools/tabs.css" rel="stylesheet">
+	<link href="./styles/{$cp_style}/developer_tools/global.css" rel="stylesheet">
+
 	<script src="./jscripts/codemirror/lib/codemirror.js?ver=1813"></script>
 	<script src="./jscripts/developer_tools/codemirror/mode/clike/clike.js"></script>
 	<script src="./jscripts/developer_tools/codemirror/mode/php/php.js"></script>
@@ -177,38 +180,6 @@ EOF;
 
 	<script src="./jscripts/developer_tools/tabs.js"></script>
 	<script src="./jscripts/developer_tools/PHiddle.js"></script>
-
-<style>
-iframe.outputFrame {
-	height: 500px;
-	width: 100%;
-	overflow-y: auto;
-}
-	
-/* CodeMirror */
-
-.CodeMirror {
-	font-size: 1.8em;
-	height: 400px;
-	padding: 7px 0px 0px 2px;
-}
-
-div.CodeMirror span.CodeMirror-matchingbracket {
-	outline: none;
-	color: #ffff4c !important;
-	font-weight: bold;
-}
-
-.cm-matchhighlight {
-	background-color: yellow;
-	color: black;
-	font-weight: bold;
-}
-
-iframe {
-	border: none;
-}
-</style>
 EOF;
 
 	$page->add_breadcrumb_item($lang->developer_tools_admin_home);

@@ -122,6 +122,8 @@ function developer_tools_PHiddle()
 {
 	global $config, $mybb, $page, $html, $lang, $cp_style;
 
+	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
+
 	$myCache = DeveloperToolsCache::getInstance();
 	$codeArray = $myCache->read('php_code');
 
@@ -131,26 +133,26 @@ function developer_tools_PHiddle()
 	}
 
 	if ($mybb->request_method == 'post') {
-		$userCode = $mybb->input['php_code'];
-		$codeArray[$mybb->user['uid']] = $userCode;
-		$myCache->update('php_code', $codeArray);
+		if (isset($mybb->input['newButton'])) {
+			developerToolsNewProject();
+		} elseif (isset($mybb->input['loadButton'])) {
+			//loadProject();
+		} elseif (isset($mybb->input['saveButton'])) {
+			//saveProject();
+		} elseif (isset($mybb->input['saveAsButton'])) {
+			//saveAs();
+		} elseif (isset($mybb->input['deleteButton'])) {
+			//deleteProject();
+		} elseif (isset($mybb->input['previewButton'])) {
+			$userCode = $mybb->input['php_code'];
+			$codeArray[$mybb->user['uid']] = $userCode;
+			$myCache->update('php_code', $codeArray);
 
-		$code = <<<EOF
-<?php
-
-define('IN_MYBB', 1);
-define('NO_ONLINE', 1);
-require_once '../../../../global.php';
-
-{$userCode}
-
-?>
-
-EOF;
-		file_put_contents(DEVELOPER_TOOLS_SANDBOX_FILE_PATH, $code);
-
-		flash_message('PHP code successfully executed.', 'success');
-		admin_redirect($html->url(array('action' => 'execute')) . '#output');
+			developerToolsWriteTemp($userCode);
+			
+			flash_message('PHP code successfully executed.', 'success');
+			admin_redirect($html->url(array('action' => 'execute')) . '#output');
+		}
 	}
 
 	$iframeSource = '';
@@ -275,8 +277,6 @@ EOF;
 	</div>
 EOF;
 
-	$buttons[] = $form->generate_submit_button($lang->developer_tools_module_execute, array('name' => 'execute_php'));
-	$form->output_submit_wrapper($buttons);
 	$form->end();
 
 	echo '</div>';

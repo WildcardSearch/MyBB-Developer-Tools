@@ -180,6 +180,56 @@ EOF;
 
 	<script src="./jscripts/developer_tools/tabs.js"></script>
 	<script src="./jscripts/developer_tools/PHiddle.js"></script>
+
+<style>
+/* toolbar */
+
+#toolBarContainer {
+	background: lightgrey;
+	max-width: 100%;
+	width: auto;
+	margin: auto;
+	padding: 7px 0px 3px 5px;
+	font-size: 12px;
+}
+
+input.toolbarButton {
+	height: 34px;
+	width: 34px;
+	cursor: pointer;
+}
+
+input.deleteButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/delete.gif);
+}
+
+input.loadButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/load.gif);
+}
+
+input.newButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/new.gif);
+}
+
+input.saveButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/save.gif);
+}
+
+input.saveButton:disabled {
+	background: url(./styles/{$cp_style}/images/developer_tools/save_disabled.gif);
+	cursor: default;
+}
+
+input.saveAsButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/saveas.gif);
+}
+
+input.previewButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/preview.gif);
+	float: right;
+	margin-right: 6px;
+}
+</style>
 EOF;
 
 	$page->add_breadcrumb_item($lang->developer_tools_admin_home);
@@ -202,7 +252,17 @@ EOF;
 	echo <<<EOF
 
 	<div id="qt_body_main_php" name="php" class="quick_tab">
-
+		<div id="toolBarContainer">
+			<span id="toolBar" class="toolBar">
+				<input type="submit" value=" " id="newButton" name="newButton" class="toolbarButton newButton" title="New"/>
+				<input type="submit" value=" " id="loadButton" name="loadButton" class="toolbarButton loadButton" title="Load..."/>
+				<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="Save"/>
+				<input type="submit" value=" " id="saveAsButton" name="saveAsButton" class="toolbarButton saveAsButton" title="Save As..."/>
+				<input type="submit" value=" " id="deleteButton" name="deleteButton" class="toolbarButton deleteButton" title="Delete..."/>
+				<input type="submit" value=" " id="previewButton" name="previewButton" class="toolbarButton previewButton" title="Preview"/>
+				<input type="hidden" id="hiddenId" name="id"/>
+			</span>
+		</div>
 EOF;
 
 	echo($form->generate_text_area('php_code', $phpCode | ' ', array('rows' => 11, "columns" => 145, 'id' => 'php_code')));

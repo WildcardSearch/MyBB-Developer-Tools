@@ -54,6 +54,12 @@ var DevTools = (function($, dt) {
 			},
 		});
 
+		if (Editor.getValue() === " ") {
+			Editor.setValue("");
+		}
+
+		Editor.addPanel($("#toolBarContainer")[0]);
+
 		tabs.show(activeTab);
 	}
 

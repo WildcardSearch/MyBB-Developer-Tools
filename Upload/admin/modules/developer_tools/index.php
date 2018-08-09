@@ -1,5 +1,7 @@
 <?php
 
+define('DEV_TOOLS_DEFAULT_TITLE', '[New PHiddle]');
+
 // Disallow direct access to this file for security reasons
 if (!defined("IN_MYBB")) {
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
@@ -120,37 +122,157 @@ exit;
  */
 function developer_tools_PHiddle()
 {
-	global $config, $mybb, $page, $html, $lang;
+	global $config, $mybb, $db, $page, $html, $lang, $cp_style, $phiddle, $myCache;
+
+	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
+
+	$title = DEV_TOOLS_DEFAULT_TITLE;
+	$phpCode = ' ';
+	$projectId = (int) $mybb->cookies['phiddle_project'];
+	if ($projectId > 0) {
+		$phiddle = new PhiddleProject($projectId);
+		if ($phiddle->isValid()) {
+			$title = $phiddle->get('title');
+			$phpCode = $phiddle->get('content');
+		}
+	} else {
+		$phiddle = new PhiddleProject();
+	}
 
 	$myCache = DeveloperToolsCache::getInstance();
 	$codeArray = $myCache->read('php_code');
 
-	$phpCode = ' ';
 	if (!empty($codeArray[$mybb->user['uid']])) {
 		$phpCode = $codeArray[$mybb->user['uid']];
 	}
 
 	if ($mybb->request_method == 'post') {
-		$userCode = $mybb->input['php_code'];
-		$codeArray[$mybb->user['uid']] = $userCode;
-		$myCache->update('php_code', $codeArray);
+		if (isset($mybb->input['newButton'])) {
+			developerToolsNewProject();
 
-		$code = <<<EOF
-<?php
+			flash_message('Project code cleared.', 'success');
+			admin_redirect($html->url());
+		} elseif (isset($mybb->input['loadButton'])) {
+			developerToolsLoadProject();
+		} elseif (isset($mybb->input['saveButton'])) {
+			if ($phiddle->isValid()) {
+				developerToolsSaveProject();
+			} else {
+				developerToolsSaveProjectAs();
+			}
+		} elseif (isset($mybb->input['save_phiddle'])) {
+			if ($phiddle->isValid()) {
+				$phiddle->set('id', 0);
+			}
 
-define('IN_MYBB', 1);
-define('NO_ONLINE', 1);
-require_once '../../../../global.php';
+			$phiddle->set('content', $phpCode);
+			$phiddle->set('title', $mybb->input['title']);
+			$id = $phiddle->save();
 
-{$userCode}
+			if (!$id) {
+				flash_message('Phiddle could not be saved successfully', 'error');
+				admin_redirect($html->url());
+			}
 
-?>
+			my_setcookie('phiddle_project', $id);
 
-EOF;
-		file_put_contents(DEVELOPER_TOOLS_SANDBOX_FILE_PATH, $code);
+			flash_message('Phiddle saved successfully', 'success');
+			admin_redirect($html->url());
+		} elseif (isset($mybb->input['saveAsButton'])) {
+			developerToolsSaveProjectAs();
+		} elseif (isset($mybb->input['deleteButton'])) {
+			developerToolsDeleteProject();
+		} elseif (isset($mybb->input['previewButton'])) {
+			$userCode = $mybb->input['php_code'];
+			$codeArray[$mybb->user['uid']] = $userCode;
+			$myCache->update('php_code', $codeArray);
 
-		flash_message('PHP code successfully executed.', 'success');
-		admin_redirect($html->url(array('action' => 'execute')) . '#tab_output');
+			developerToolsWriteTemp($userCode);
+			
+			flash_message('PHP code successfully executed.', 'success');
+			admin_redirect($html->url(array('action' => 'execute')) . '#output');
+		} elseif (isset($mybb->input['load_phiddle'])) {
+			$phiddle = new PhiddleProject($mybb->input['phiddle']);
+
+			if (!$phiddle->isValid()) {
+				flash_message('PHiddle could not be loaded', 'success');
+				admin_redirect($html->url());
+			}
+
+			my_setcookie('phiddle_project', $phiddle->get('id'));
+			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
+			$myCache->update('php_code', $codeArray);
+			
+			flash_message('PHiddle successfully loaded.', 'success');
+			admin_redirect($html->url());
+		} elseif (isset($mybb->input['delete_phiddle'])) {
+			$deletedCurrentProject = false;
+
+			$errorCount = 0;
+			$successCount = 0;
+			foreach ((array) $mybb->input['phiddle'] as $id) {
+				$phiddle = new PhiddleProject($id);
+
+				if (!$phiddle->isValid()) {
+					$errorCount++;
+					continue;
+				}
+
+				$result = $phiddle->remove();
+
+				if (!$result) {
+					$errorCount++;
+					continue;
+				}
+
+				if ($id == $projectId) {
+					$deletedCurrentProject = true;
+				}
+
+				$successCount++;
+			}
+
+			if ($deletedCurrentProject) {
+				developerToolsNewProject();
+			}
+
+			if ($errorCount) {
+				flash_message($lang->sprintf('{1} PHiddle(s) could not be successfully deleted.', $errorCount), 'error');
+			}
+
+			if ($successCount) {
+				flash_message($lang->sprintf('{1} PHiddle(s) successfully deleted.', $successCount), 'success');
+			}
+
+			admin_redirect($html->url());
+		} elseif (isset($mybb->input['importButton'])) {
+			developerToolsImportProject();
+		} elseif (isset($mybb->input['import_phiddle'])) {
+			$xml = developerToolsCheckUploadedFile();
+
+			$phiddle = new PhiddleProject();
+			$result = $phiddle->import($xml);
+			if (!$result) {
+				flash_message('PHiddle could not be imported successfully.', 'error');
+				admin_redirect($html->url());
+			}
+
+			$id = $phiddle->save($xml);
+			if (!$id) {
+				flash_message('PHiddle could not be saved successfully.', 'error');
+				admin_redirect($html->url());
+			}
+			
+			my_setcookie('phiddle_project', $id);
+			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
+			$myCache->update('php_code', $codeArray);
+
+			flash_message('PHiddle successfully imported.', 'success');
+			admin_redirect($html->url());
+		} elseif (isset($mybb->input['exportButton'])) {
+			$phiddle->export();
+			exit;
+		}
 	}
 
 	$iframeSource = '';
@@ -163,6 +285,10 @@ EOF;
 	<link href="./jscripts/codemirror/lib/codemirror.css?ver=1813" rel="stylesheet">
 	<link href="./jscripts/developer_tools/codemirror/theme/blackboard.css" rel="stylesheet">
 	<link href="./jscripts/developer_tools/codemirror/addon/display/fullscreen.css" rel="stylesheet">
+	<link href="./styles/default/developer_tools/tabs.css" rel="stylesheet">
+
+	<link href="./styles/{$cp_style}/developer_tools/tabs.css" rel="stylesheet">
+	<link href="./styles/{$cp_style}/developer_tools/global.css" rel="stylesheet">
 
 	<script src="./jscripts/codemirror/lib/codemirror.js?ver=1813"></script>
 	<script src="./jscripts/developer_tools/codemirror/mode/clike/clike.js"></script>
@@ -174,92 +300,117 @@ EOF;
 	<script src="./jscripts/developer_tools/codemirror/addon/display/fullscreen.js"></script>
 	<script src="./jscripts/developer_tools/codemirror/addon/display/panel.js"></script>
 
+	<script src="./jscripts/developer_tools/tabs.js"></script>
 	<script src="./jscripts/developer_tools/PHiddle.js"></script>
 
-	<style>
-iframe.outputFrame {
-	height: 500px;
-	width: 100%;
-	overflow-y: auto;
-}
-	
-/* CodeMirror */
+<style>
+/* toolbar */
 
-.CodeMirror {
-	font-size: 1.8em;
-	height: 400px;
+#toolBarContainer {
+	background: lightgrey;
+	max-width: 100%;
+	width: auto;
+	margin: auto;
+	padding: 7px 0px 3px 5px;
+	font-size: 12px;
 }
 
-div.CodeMirror span.CodeMirror-matchingbracket {
-	outline: none;
-	color: #ffff4c !important;
-	font-weight: bold;
+input.toolbarButton {
+	height: 34px;
+	width: 34px;
+	cursor: pointer;
 }
 
-.cm-matchhighlight {
-	background-color: yellow;
-	color: black;
-	font-weight: bold;
+input.newButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/new.gif);
 }
-	</style>
 
+input.loadButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/load.gif);
+}
+
+input.saveButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/save.gif);
+}
+
+input.saveButton:disabled {
+	background: url(./styles/{$cp_style}/images/developer_tools/save_disabled.gif);
+	cursor: default;
+}
+
+input.saveAsButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/saveas.gif);
+}
+
+input.deleteButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/delete.gif);
+}
+
+input.importButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/import.png);
+}
+
+input.exportButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/export.png);
+}
+
+input.previewButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/preview.gif);
+	float: right;
+	margin-right: 6px;
+}
+</style>
 EOF;
 
 	$page->add_breadcrumb_item($lang->developer_tools_admin_home);
-	$page->output_header($lang->developer_tools_admin_home);
+	$page->output_header($lang->developer_tools_admin_home . " &mdash; {$title}");
 
-	$tabs = array(
-		"php" => $lang->developer_tools_phiddle_tab_php,
-		"output" => $lang->developer_tools_phiddle_tab_output,
-	);
-	$page->output_tab_control($tabs, true);
+	echo <<<EOF
+	<div id="quick_tab_main">
+		<li id="qt_link_main_php" name="php" class="quick_tab">
+			<a href="{$html->url()}#php">PHP</a>
+			<span style="display: none;">PHP</span>
+		</li>
+		<li id="qt_link_main_output" name="output" class="quick_tab">
+			<a href="{$html->url()}#output">Output</a>
+			<span style="display: none;">Output</span>
+		</li>
+EOF;
 
 	$form = new Form($html->url(), 'post');
 
 	echo <<<EOF
 
-	<div id="tab_php" style="width: auto;">
-
+	<div id="qt_body_main_php" name="php" class="quick_tab">
+		<div id="toolBarContainer">
+			<span id="toolBar" class="toolBar">
+				<input type="submit" value=" " id="newButton" name="newButton" class="toolbarButton newButton" title="New"/>
+				<input type="submit" value=" " id="loadButton" name="loadButton" class="toolbarButton loadButton" title="Load..."/>
+				<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="Save"/>
+				<input type="submit" value=" " id="saveAsButton" name="saveAsButton" class="toolbarButton saveAsButton" title="Save As..."/>
+				<input type="submit" value=" " id="deleteButton" name="deleteButton" class="toolbarButton deleteButton" title="Delete..."/>
+				<input type="submit" value=" " id="importButton" name="importButton" class="toolbarButton importButton" title="Import..."/>
+				<input type="submit" value=" " id="exportButton" name="exportButton" class="toolbarButton exportButton" title="Export"/>
+				<input type="submit" value=" " id="previewButton" name="previewButton" class="toolbarButton previewButton" title="Preview"/>
+				<input type="hidden" id="hiddenId" name="id"/>
+			</span>
+		</div>
 EOF;
 
-	$formContainer = new FormContainer($lang->developer_tools_admin_home);
-
-	$formContainer->output_row('PHP Code Input', 'enter your PHP code here', $form->generate_text_area('php_code', $phpCode | ' ', array('rows' => 11, "columns" => 145, 'id' => 'php_code')));
-
-	$formContainer->end();
+	echo($form->generate_text_area('php_code', $phpCode | ' ', array('rows' => 11, "columns" => 145, 'id' => 'php_code')));
 
 	echo <<<EOF
 
-</div>
-<div id="tab_output" style="width: auto;">
-
+	</div>
+	<div id="qt_body_main_output" name="output" class="quick_tab">
+		<iframe src="{$iframeSource}" class="outputFrame"> </iframe>
+	</div>
 EOF;
 
-	$formContainer = new FormContainer($lang->developer_tools_admin_home);
-
-	$formContainer->output_row('PHP Code Input', 'enter your PHP code here', <<<EOF
-<iframe src="{$iframeSource}" class="outputFrame"> </iframe>
-EOF
-	);
-
-	$formContainer->end();
-
-	echo '</div>';
-
-	$buttons[] = $form->generate_submit_button($lang->developer_tools_module_execute, array('name' => 'execute_php'));
-	$form->output_submit_wrapper($buttons);
 	$form->end();
 
+	echo '</div>';
 	$page->output_footer();	
 }
-
-/* echo <<<EOF
-<div class="message">
-	<h2>{$lang->developer_tools}</h2>
-	<p>This module is intended to provide tools to assist in development and testing MyBB forum software, plugins, and themes.</p>
-	<p>Using various modules listed to the left, this plugin allows quick setup of a MyBB forum for the purposes of testing, be it in development, theme design, or SQA.</p>
-	<p>Follow the development of this project on <a href="">GitHub</a>
-</div>
-EOF; */
 
 ?>

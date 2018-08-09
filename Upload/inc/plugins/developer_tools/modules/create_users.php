@@ -96,11 +96,12 @@ function developer_tools_create_users_execute($settings)
 
 	$mybb->settings['allowmultipleemails'] = 1;
 
+	$nameSource = 'international';
 	if ($local_names) {
-		require_once '../../data/names/local/names.php';
-	} else {
-		require_once '../../data/names/international/names.php';
+		$nameSource = 'local';
 	}
+
+	require_once MYBB_ROOT . "inc/plugins/developer_tools/data/names/{$nameSource}/names.php";
 
 	if (!$password ||
 		my_strlen($password) == 0) {

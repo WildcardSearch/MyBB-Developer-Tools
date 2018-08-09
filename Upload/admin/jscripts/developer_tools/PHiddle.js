@@ -2,6 +2,7 @@ var DevTools = (function($, dt) {
 	"use strict";
 
 	var Editor,
+		tabs,
 
 	options = {
 	},
@@ -15,13 +16,15 @@ var DevTools = (function($, dt) {
 	}
 
 	function init() {
-		var reFocus = false;
-		if (location.hash == "#tab_output") {
-			reFocus = true;
-		}
+		var activeTab;
 
-		$("#tabs li.first").find('a').click();
+		DevTools.QuickTab.newInstance('main', ['php','output']);
+		tabs = DevTools.QuickTab.getInstance('main');
 
+		tabs.getActive();
+		activeTab = tabs.active;
+
+		tabs.show('php');
 		Editor = CodeMirror.fromTextArea($("#php_code")[0], {
 			mode: "text/x-php",
 			theme: "blackboard",
@@ -51,9 +54,13 @@ var DevTools = (function($, dt) {
 			},
 		});
 
-		if (reFocus) {
-			$("#tabs li.first").next('li').find('a').click();
+		if (Editor.getValue() === " ") {
+			Editor.setValue("");
 		}
+
+		Editor.addPanel($("#toolBarContainer")[0]);
+
+		tabs.show(activeTab);
 	}
 
 	$(init);

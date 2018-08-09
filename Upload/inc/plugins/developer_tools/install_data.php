@@ -7,6 +7,15 @@
  * this file contains data used by classes/installer.php
  */
 
+$tables = array(
+	"phiddles" => array(
+		"id" => 'INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY',
+		"title" => 'VARCHAR(32) NOT NULL',
+		"content" => 'TEXT',
+		"dateline" => 'INT(10)',
+	),
+);
+
 $settings = array(
 	'developer_tools_settings' => array(
 		'group' => array(

@@ -120,14 +120,26 @@ exit;
  */
 function developer_tools_PHiddle()
 {
-	global $config, $mybb, $page, $html, $lang, $cp_style;
+	global $config, $mybb, $db, $page, $html, $lang, $cp_style, $phiddle, $myCache;
 
 	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
+
+	$title = '[New PHiddle]';
+	$phpCode = ' ';
+	$projectId = (int) $mybb->cookies['phiddle_project'];
+	if ($projectId > 0) {
+		$phiddle = new PhiddleProject($projectId);
+		if ($phiddle->isValid()) {
+			$title = $phiddle->get('title');
+			$phpCode = $phiddle->get('content');
+		}
+	} else {
+		$phiddle = new PhiddleProject();
+	}
 
 	$myCache = DeveloperToolsCache::getInstance();
 	$codeArray = $myCache->read('php_code');
 
-	$phpCode = ' ';
 	if (!empty($codeArray[$mybb->user['uid']])) {
 		$phpCode = $codeArray[$mybb->user['uid']];
 	}
@@ -136,11 +148,28 @@ function developer_tools_PHiddle()
 		if (isset($mybb->input['newButton'])) {
 			developerToolsNewProject();
 		} elseif (isset($mybb->input['loadButton'])) {
-			//loadProject();
+			developerToolsLoadProject();
 		} elseif (isset($mybb->input['saveButton'])) {
-			//saveProject();
+			if ($phiddle->isValid()) {
+				developerToolsSaveProject();
+			} else {
+				developerToolsSaveProjectAs();
+			}
+		} elseif (isset($mybb->input['save_phiddle'])) {
+			if ($phiddle->isValid()) {
+				$phiddle->set('id', 0);
+			}
+
+			$phiddle->set('content', $phpCode);
+			$phiddle->set('title', $mybb->input['title']);
+			$id = $phiddle->save();
+
+			my_setcookie('phiddle_project', $id);
+
+			flash_message('Phiddle saved successfully', 'success');
+			admin_redirect($html->url());
 		} elseif (isset($mybb->input['saveAsButton'])) {
-			//saveAs();
+			developerToolsSaveProjectAs();
 		} elseif (isset($mybb->input['deleteButton'])) {
 			//deleteProject();
 		} elseif (isset($mybb->input['previewButton'])) {
@@ -152,6 +181,14 @@ function developer_tools_PHiddle()
 			
 			flash_message('PHP code successfully executed.', 'success');
 			admin_redirect($html->url(array('action' => 'execute')) . '#output');
+		} elseif (isset($mybb->input['load_phiddle'])) {
+			$phiddle = new PhiddleProject($mybb->input['phiddle']);
+			$phpCode = $phiddle->get('content');
+			$title = $phiddle->get('title');
+			
+			my_setcookie('phiddle_project', $phiddle->get('id'));
+			$codeArray[$mybb->user['uid']] = $phpCode;
+			$myCache->update('php_code', $codeArray);
 		}
 	}
 
@@ -235,7 +272,7 @@ input.previewButton {
 EOF;
 
 	$page->add_breadcrumb_item($lang->developer_tools_admin_home);
-	$page->output_header($lang->developer_tools_admin_home);
+	$page->output_header($lang->developer_tools_admin_home . " &mdash; {$title}");
 
 	echo <<<EOF
 	<div id="quick_tab_main">

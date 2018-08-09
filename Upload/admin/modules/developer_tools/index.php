@@ -213,6 +213,24 @@ function developer_tools_PHiddle()
 
 			flash_message('PHiddle(s) successfully deleted.', 'success');
 			admin_redirect($html->url());
+		} elseif (isset($mybb->input['importButton'])) {
+			developerToolsImportProject();
+		} elseif (isset($mybb->input['import_phiddle'])) {
+			$xml = developerToolsCheckUploadedFile();
+
+			$phiddle = new PhiddleProject();
+			$phiddle->import($xml);
+			$id = $phiddle->save($xml);
+			
+			my_setcookie('phiddle_project', $id);
+			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
+			$myCache->update('php_code', $codeArray);
+
+			flash_message('PHiddle successfully imported.', 'success');
+			admin_redirect($html->url());
+		} elseif (isset($mybb->input['exportButton'])) {
+			$phiddle->export();
+			exit;
 		}
 	}
 
@@ -262,16 +280,12 @@ input.toolbarButton {
 	cursor: pointer;
 }
 
-input.deleteButton {
-	background: url(./styles/{$cp_style}/images/developer_tools/delete.gif);
+input.newButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/new.gif);
 }
 
 input.loadButton {
 	background: url(./styles/{$cp_style}/images/developer_tools/load.gif);
-}
-
-input.newButton {
-	background: url(./styles/{$cp_style}/images/developer_tools/new.gif);
 }
 
 input.saveButton {
@@ -285,6 +299,18 @@ input.saveButton:disabled {
 
 input.saveAsButton {
 	background: url(./styles/{$cp_style}/images/developer_tools/saveas.gif);
+}
+
+input.deleteButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/delete.gif);
+}
+
+input.importButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/import.png);
+}
+
+input.exportButton {
+	background: url(./styles/{$cp_style}/images/developer_tools/export.png);
 }
 
 input.previewButton {
@@ -322,6 +348,8 @@ EOF;
 				<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="Save"/>
 				<input type="submit" value=" " id="saveAsButton" name="saveAsButton" class="toolbarButton saveAsButton" title="Save As..."/>
 				<input type="submit" value=" " id="deleteButton" name="deleteButton" class="toolbarButton deleteButton" title="Delete..."/>
+				<input type="submit" value=" " id="importButton" name="importButton" class="toolbarButton importButton" title="Import..."/>
+				<input type="submit" value=" " id="exportButton" name="exportButton" class="toolbarButton exportButton" title="Export"/>
 				<input type="submit" value=" " id="previewButton" name="previewButton" class="toolbarButton previewButton" title="Preview"/>
 				<input type="hidden" id="hiddenId" name="id"/>
 			</span>

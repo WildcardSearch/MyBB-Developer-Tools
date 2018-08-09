@@ -170,6 +170,33 @@ EOF;
 	exit;
 }
 
+function developerToolsImportProject()
+{
+	global $mybb, $lang, $db, $html, $page, $phiddle, $myCache;
+
+	if (!$lang->developer_tools) {
+		$lang->load('developer_tools');
+	}
+
+	$page->add_breadcrumb_item('Import PHiddle');
+	$page->output_header("{$lang->developer_tools} &mdash; Save As...");
+
+	$form = new Form($html->url(), 'post', '', true);
+	$formContainer = new FormContainer('Import PHiddle');
+
+	$formContainer->output_row('Select File', 'select a file to import', $form->generate_file_upload_box('file'));
+
+	$formContainer->end();
+
+	$buttons[] = $form->generate_submit_button('Import', array('name' => 'import_phiddle'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_import'));
+	$form->output_submit_wrapper($buttons);
+	$form->end();
+
+	$page->output_footer();
+	exit;
+}
+
 function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
 {
 	global $lang, $db;
@@ -204,6 +231,47 @@ function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
 	}
 
 	return $form->generate_select_box($name, $options, $selected, $attr);
+}
+
+/**
+ * validate an uploaded file and return its contents
+ *
+ * @param  string the name of the file input
+ * @param  string the redirect URL on error
+ * @return string the file contents
+ */
+function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '')
+{
+	global $lang, $html;
+
+	if (!$returnUrl) {
+		$returnUrl = $html->url();
+	}
+
+	if (!$_FILES[$name] ||
+		$_FILES[$name]['error'] == 4) {
+		flash_message('no file', 'error');
+		admin_redirect($returnUrl);
+	}
+
+	if ($_FILES[$name]['error']) {
+		flash_message($lang->sprintf('Error: {1}', $_FILES['file']['error']), 'error');
+		admin_redirect($returnUrl);
+	}
+
+	if (!is_uploaded_file($_FILES[$name]['tmp_name'])) {
+		flash_message('did not upload', 'error');
+		admin_redirect($returnUrl);
+	}
+
+	$content = @file_get_contents($_FILES[$name]['tmp_name']);
+	@unlink($_FILES[$name]['tmp_name']);
+
+	if (strlen(trim($content)) == 0) {
+		flash_message('file empty', 'error');
+		admin_redirect($returnUrl);
+	}
+	return $content;
 }
 
 ?>

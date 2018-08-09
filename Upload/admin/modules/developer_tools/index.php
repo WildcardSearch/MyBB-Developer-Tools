@@ -1,5 +1,7 @@
 <?php
 
+define('DEV_TOOLS_DEFAULT_TITLE', '[New PHiddle]');
+
 // Disallow direct access to this file for security reasons
 if (!defined("IN_MYBB")) {
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
@@ -124,7 +126,7 @@ function developer_tools_PHiddle()
 
 	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
 
-	$title = '[New PHiddle]';
+	$title = DEV_TOOLS_DEFAULT_TITLE;
 	$phpCode = ' ';
 	$projectId = (int) $mybb->cookies['phiddle_project'];
 	if ($projectId > 0) {
@@ -147,6 +149,9 @@ function developer_tools_PHiddle()
 	if ($mybb->request_method == 'post') {
 		if (isset($mybb->input['newButton'])) {
 			developerToolsNewProject();
+
+			flash_message('Project code cleared.', 'success');
+			admin_redirect($html->url());
 		} elseif (isset($mybb->input['loadButton'])) {
 			developerToolsLoadProject();
 		} elseif (isset($mybb->input['saveButton'])) {
@@ -171,7 +176,7 @@ function developer_tools_PHiddle()
 		} elseif (isset($mybb->input['saveAsButton'])) {
 			developerToolsSaveProjectAs();
 		} elseif (isset($mybb->input['deleteButton'])) {
-			//deleteProject();
+			developerToolsDeleteProject();
 		} elseif (isset($mybb->input['previewButton'])) {
 			$userCode = $mybb->input['php_code'];
 			$codeArray[$mybb->user['uid']] = $userCode;
@@ -183,12 +188,31 @@ function developer_tools_PHiddle()
 			admin_redirect($html->url(array('action' => 'execute')) . '#output');
 		} elseif (isset($mybb->input['load_phiddle'])) {
 			$phiddle = new PhiddleProject($mybb->input['phiddle']);
-			$phpCode = $phiddle->get('content');
-			$title = $phiddle->get('title');
 			
 			my_setcookie('phiddle_project', $phiddle->get('id'));
-			$codeArray[$mybb->user['uid']] = $phpCode;
+			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
 			$myCache->update('php_code', $codeArray);
+			
+			flash_message('PHiddle successfully loaded.', 'success');
+			admin_redirect($html->url());
+		} elseif (isset($mybb->input['delete_phiddle'])) {
+			$deletedCurrentProject = false;
+
+			foreach ((array) $mybb->input['phiddle'] as $id) {
+				$phiddle = new PhiddleProject($id);
+				$phpCode = $phiddle->remove();
+
+				if ($id == $projectId) {
+					$deletedCurrentProject = true;
+				}
+			}
+
+			if ($deletedCurrentProject) {
+				developerToolsNewProject();
+			}
+
+			flash_message('PHiddle(s) successfully deleted.', 'success');
+			admin_redirect($html->url());
 		}
 	}
 

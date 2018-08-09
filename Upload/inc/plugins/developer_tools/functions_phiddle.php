@@ -33,9 +33,6 @@ function developerToolsNewProject()
 	$codeArray[$mybb->user['uid']] = '';
 	$myCache->update('php_code', $codeArray);
 	my_setcookie('phiddle_project', 0);
-
-	flash_message('Project code cleared.', 'success');
-	admin_redirect($html->url());
 }
 
 function developerToolsLoadProject()
@@ -46,20 +43,10 @@ function developerToolsLoadProject()
 		$lang->load('developer_tools');
 	}
 
-	$query = $db->simple_select('phiddles', 'id,title');
-	$count = $db->num_rows($query);
-	if ($count == 0) {
+	$selectHtml = developerToolsCreatePhiddleSelect();
+	if (!$selectHtml) {
 		flash_message('There are no saved Phiddles to load.', 'error');
 		admin_redirect($html->url());
-	}
-
-	while ($phiddle = $db->fetch_array($query)) {
-		$options[$phiddle['id']] = $phiddle['title'];
-	}
-
-	$size = 10;
-	if ($count < 10) {
-		$size = $count;
 	}
 
 	$page->extra_header .= <<<EOF
@@ -79,7 +66,7 @@ EOF;
 	$form = new Form($html->url(), 'post');
 	$formContainer = new FormContainer('Open a Phiddle');
 
-	$formContainer->output_row('Select a Phiddle to load', 'select a project from the list', $form->generate_select_box('phiddle', $options, '', array('id' => 'phiddle_select', 'size' => $size, 'class' => 'phiddleList')), 'phiddle');
+	$formContainer->output_row('Select a Phiddle to load', 'select a project from the list', $selectHtml, 'phiddle');
 
 	$formContainer->end();
 
@@ -137,6 +124,86 @@ function developerToolsSaveProjectAs()
 
 	$page->output_footer();
 	exit;
+}
+
+function developerToolsDeleteProject()
+{
+	global $mybb, $lang, $db, $html, $page;
+
+	if (!$lang->developer_tools) {
+		$lang->load('developer_tools');
+	}
+
+	$selectHtml = developerToolsCreatePhiddleSelect('', true);
+	if (!$selectHtml) {
+		flash_message('There are no saved Phiddles to delete.', 'error');
+		admin_redirect($html->url());
+	}
+
+	$page->extra_header .= <<<EOF
+<style>
+select.phiddleList {
+	margin: 10px;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+</style>
+
+EOF;
+
+	$page->add_breadcrumb_item('Delete a PHiddle');
+	$page->output_header("{$lang->developer_tools} &mdash; Delete");
+
+	$form = new Form($html->url(), 'post');
+	$formContainer = new FormContainer('Delete a Phiddle');
+
+	$formContainer->output_row('Select a Phiddle to delete', 'select one or more projects from the list', $selectHtml, 'phiddle');
+
+	$formContainer->end();
+
+	$buttons[] = $form->generate_submit_button('Delete', array('name' => 'delete_phiddle'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_delete'));
+	$form->output_submit_wrapper($buttons);
+	$form->end();
+
+	$page->output_footer();
+	exit;
+}
+
+function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
+{
+	global $lang, $db;
+
+	$form = new Form('', '', '', false, '', true);
+
+	if (!$lang->developer_tools) {
+		$lang->load('developer_tools');
+	}
+
+	$query = $db->simple_select('phiddles', 'id,title');
+	$count = $db->num_rows($query);
+	if ($count == 0) {
+		return false;
+	}
+
+	while ($phiddle = $db->fetch_array($query)) {
+		$options[$phiddle['id']] = $phiddle['title'];
+	}
+
+	$size = 10;
+	if ($count < 10) {
+		$size = $count;
+	}
+
+	$attr = array('id' => 'phiddle_select', 'size' => $size, 'class' => 'phiddleList');
+
+	$name = 'phiddle';
+	if ($multi) {
+		$attr['multiple'] = true;
+		$name .= '[]';
+	}
+
+	return $form->generate_select_box($name, $options, $selected, $attr);
 }
 
 ?>

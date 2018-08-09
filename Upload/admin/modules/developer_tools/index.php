@@ -169,6 +169,11 @@ function developer_tools_PHiddle()
 			$phiddle->set('title', $mybb->input['title']);
 			$id = $phiddle->save();
 
+			if (!$id) {
+				flash_message('Phiddle could not be saved successfully', 'error');
+				admin_redirect($html->url());
+			}
+
 			my_setcookie('phiddle_project', $id);
 
 			flash_message('Phiddle saved successfully', 'success');
@@ -188,7 +193,12 @@ function developer_tools_PHiddle()
 			admin_redirect($html->url(array('action' => 'execute')) . '#output');
 		} elseif (isset($mybb->input['load_phiddle'])) {
 			$phiddle = new PhiddleProject($mybb->input['phiddle']);
-			
+
+			if (!$phiddle->isValid()) {
+				flash_message('PHiddle could not be loaded', 'success');
+				admin_redirect($html->url());
+			}
+
 			my_setcookie('phiddle_project', $phiddle->get('id'));
 			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
 			$myCache->update('php_code', $codeArray);
@@ -198,20 +208,42 @@ function developer_tools_PHiddle()
 		} elseif (isset($mybb->input['delete_phiddle'])) {
 			$deletedCurrentProject = false;
 
+			$errorCount = 0;
+			$successCount = 0;
 			foreach ((array) $mybb->input['phiddle'] as $id) {
 				$phiddle = new PhiddleProject($id);
-				$phpCode = $phiddle->remove();
+
+				if (!$phiddle->isValid()) {
+					$errorCount++;
+					continue;
+				}
+
+				$result = $phiddle->remove();
+
+				if (!$result) {
+					$errorCount++;
+					continue;
+				}
 
 				if ($id == $projectId) {
 					$deletedCurrentProject = true;
 				}
+
+				$successCount++;
 			}
 
 			if ($deletedCurrentProject) {
 				developerToolsNewProject();
 			}
 
-			flash_message('PHiddle(s) successfully deleted.', 'success');
+			if ($errorCount) {
+				flash_message($lang->sprintf('{1} PHiddle(s) could not be successfully deleted.', $errorCount), 'error');
+			}
+
+			if ($successCount) {
+				flash_message($lang->sprintf('{1} PHiddle(s) successfully deleted.', $successCount), 'success');
+			}
+
 			admin_redirect($html->url());
 		} elseif (isset($mybb->input['importButton'])) {
 			developerToolsImportProject();
@@ -219,8 +251,17 @@ function developer_tools_PHiddle()
 			$xml = developerToolsCheckUploadedFile();
 
 			$phiddle = new PhiddleProject();
-			$phiddle->import($xml);
+			$result = $phiddle->import($xml);
+			if (!$result) {
+				flash_message('PHiddle could not be imported successfully.', 'error');
+				admin_redirect($html->url());
+			}
+
 			$id = $phiddle->save($xml);
+			if (!$id) {
+				flash_message('PHiddle could not be saved successfully.', 'error');
+				admin_redirect($html->url());
+			}
 			
 			my_setcookie('phiddle_project', $id);
 			$codeArray[$mybb->user['uid']] = $phiddle->get('content');

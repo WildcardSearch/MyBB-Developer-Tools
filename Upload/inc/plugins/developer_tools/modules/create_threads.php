@@ -68,7 +68,7 @@ function developer_tools_create_threads_execute($settings)
 {
 	global $mybb, $db, $html, $li, $lang;
 	
-	require_once '../../inc/thirdparty/joshtronic/LoremIpsum.php';
+	require_once MYBB_ROOT.'inc/plugins/developer_tools/joshtronic/LoremIpsum.php';
 	$li = new joshtronic\LoremIpsum();
 
 	$threadCount = (int) $settings['threadcount'];

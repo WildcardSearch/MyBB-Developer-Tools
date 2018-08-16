@@ -8,6 +8,14 @@
  */
 
 $tables = array(
+	'pgsql' => array(
+		'phiddles' => array(
+			'id' => 'SERIAL',
+			'title' => 'VARCHAR(32) NOT NULL',
+			'content' => 'TEXT',
+			'dateline' => 'INT NOT NULL, PRIMARY KEY(id)',
+		),
+	),
 	"phiddles" => array(
 		"id" => 'INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY',
 		"title" => 'VARCHAR(32) NOT NULL',

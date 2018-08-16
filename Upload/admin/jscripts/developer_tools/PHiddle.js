@@ -30,7 +30,7 @@ var DevTools = (function($, dt) {
 			theme: "blackboard",
 			autofocus: true,
 			lineNumbers: true,
-			firstLineNumber: 7,
+			firstLineNumber: 9,
 			lineWrapping: true,
 			tabMode: "indent",
 			indentUnit: 4,

@@ -67,8 +67,8 @@ EOF
 function developer_tools_create_threads_execute($settings)
 {
 	global $mybb, $db, $html, $li, $lang;
-	
-	require_once '../../inc/thirdparty/joshtronic/LoremIpsum.php';
+
+	require_once MYBB_ROOT.'inc/plugins/developer_tools/joshtronic/LoremIpsum.php';
 	$li = new joshtronic\LoremIpsum();
 
 	$threadCount = (int) $settings['threadcount'];
@@ -195,10 +195,15 @@ function getRandomUser($totalUsers=null)
 	global $db;
 
 	static $users, $total;
-	
+
+	$randFunction = 'RAND()';
+	if ($db->engine == 'pgsql') {
+		$randFunction = 'RANDOM()';
+	}
+
 	if (!isset($users)) {
 		$total = (int) $totalUsers;
-		$query = $db->simple_select('users', 'username,uid', '', array("order_by" => 'RAND()', "limit" => $total));
+		$query = $db->simple_select('users', 'username,uid', '', array("order_by" => $randFunction, "limit" => $total));
 		while ($user = $db->fetch_array($query)) {
 			$users[] = $user;
 		}

@@ -9,7 +9,7 @@
  *
  */
 
-class WildcardPluginInstaller010300 implements WildcardPluginInstallerInterface010000
+class WildcardPluginInstaller010301 implements WildcardPluginInstallerInterface010000
 {
 	/**
 	 * @const version
@@ -222,11 +222,8 @@ class WildcardPluginInstaller010300 implements WildcardPluginInstallerInterface0
 
 		// create the table if it doesn't already exist
 		if (!$this->tableExists($table)) {
-			$queryString = "CREATE TABLE {$this->db->table_prefix}{$table} ({$columnList});";
-			if ($this->db->engine != 'pgsql') {
-				$queryString .= "ENGINE={$this->db->table_type}{$collation}";
-			}
-			$this->db->write_query($queryString);
+			$queryExtra = ($this->db->engine == 'pgsql') ? '' : " ENGINE={$this->db->table_type}{$collation}";
+			$this->db->write_query("CREATE TABLE {$this->db->table_prefix}{$table} ({$columnList}){$queryExtra};");
 		}
 	}
 

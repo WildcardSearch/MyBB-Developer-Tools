@@ -7,7 +7,7 @@
  * wrapper to handle the plugin's installer
  */
 
-class DeveloperToolsInstaller extends WildcardPluginInstaller010300
+class DeveloperToolsInstaller extends WildcardPluginInstaller010301
 {
 	static public function getInstance()
 	{

@@ -14,7 +14,7 @@ class WildcardPluginInstaller010301 implements WildcardPluginInstallerInterface0
 	/**
 	 * @const version
 	 */
-	const VERSION = '1.3';
+	const VERSION = '1.3.1';
 
 	/**
 	 * @var object a copy of the MyBB db object

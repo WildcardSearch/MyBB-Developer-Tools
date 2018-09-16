@@ -72,6 +72,12 @@ EOF
 				'optionscode' => 'yesno',
 				'value' => '0',
 			),
+			'referrer' => array(
+				'title' => $lang->developer_tools_create_users_referrer_title,
+				'description' => $lang->developer_tools_create_users_referrer_desc,
+				'optionscode' => 'text',
+				'value' => '',
+			),
 		),
 	);
 }
@@ -90,7 +96,7 @@ function developer_tools_create_users_execute($settings)
 	if ($amount == 0) {
 		$amount = 10;
 	}
-	
+
 	// Set up user handler.
 	require_once MYBB_ROOT . 'inc/datahandlers/user.php';
 
@@ -121,7 +127,8 @@ function developer_tools_create_users_execute($settings)
 		'email2' => $email,
 		'usergroup' => $usergroup,
 		'regip' => '127.0.0.1',
-		'longregip' => my_ip2long('127.0.0.1')
+		'longregip' => my_ip2long('127.0.0.1'),
+		'referrer' => $referrer,
 	);
 
 	$addedNames = '';
@@ -137,7 +144,7 @@ function developer_tools_create_users_execute($settings)
 		$userhandler->insert_user();
 		$addedNameCount++;
 	}
-	
+
 	flash_message($lang->sprintf($lang->developer_tools_create_users_success_message, $addedNameCount), 'success');
 	admin_redirect($html->url());
 }

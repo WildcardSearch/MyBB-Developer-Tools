@@ -62,6 +62,9 @@ $l['developer_tools_create_users_caps_desc'] = 'YES (default) to capitalize the 
 $l['developer_tools_create_users_local_names_title'] = 'Local Names?';
 $l['developer_tools_create_users_local_names_desc'] = 'YES to use local names, NO (default) to use names from an international list';
 
+$l['developer_tools_create_users_referrer_title'] = 'Referrer';
+$l['developer_tools_create_users_referrer_desc'] = 'blank (default) to forego assigning a referrer to created account(s), string user name to assign a user as the referrer';
+
 $l['developer_tools_create_users_success_message'] = '{1} user(s) successfully created.';
 
 // create_threads

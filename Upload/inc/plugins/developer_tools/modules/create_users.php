@@ -135,7 +135,7 @@ function developer_tools_create_users_execute($settings)
 	$addedNameCount = 0;
 	while ($addedNameCount < $amount) {
 		$userhandler = new UserDataHandler('insert');
-		$user['username'] = assembleName($name_count, $caps);
+		$user['username'] = developerToolsCreateUsersAssembleName($name_count, $caps);
 		$userhandler->set_data($user);
 		if (!$userhandler->validate_user()) {
 			continue;
@@ -156,18 +156,18 @@ function developer_tools_create_users_execute($settings)
  * @param  bool
  * @return string
  */
-function assembleName($maxNames, $caps)
+function developerToolsCreateUsersAssembleName($maxNames, $caps)
 {
 	global $mybb, $firstNames, $lastNames;
 
 	$names = array();
 	if ($maxNames <= 1) {
-		$names[] = getName($firstNames, $caps);
+		$names[] = developerToolsCreateUsersGetName($firstNames, $caps);
 	} else {
 		while (count($names) < ($maxNames - 1)) {
-			$names[] = getName($firstNames, $caps, $leet, $special);
+			$names[] = developerToolsCreateUsersGetName($firstNames, $caps, $leet, $special);
 		}
-		$names[] = getName($lastNames, $caps);
+		$names[] = developerToolsCreateUsersGetName($lastNames, $caps);
 	}
 
 	while (count($names) > 1 &&
@@ -184,7 +184,7 @@ function assembleName($maxNames, $caps)
  * @param  bool
  * @return string
  */
-function getName($names, $caps = false)
+function developerToolsCreateUsersGetName($names, $caps = false)
 {
 	$name = mb_strtolower($names[rand(0, count($names) - 1)]);
 

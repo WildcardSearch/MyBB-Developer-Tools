@@ -277,7 +277,7 @@ function developer_tools_PHiddle()
 
 	$iframeSource = '';
 	if ($mybb->input['action'] == 'execute') {
-		$iframeSource = "{$mybb->settings['bburl']}/{$config['admin_dir']}/modules/developer_tools/sandbox/index.php";
+		$iframeSource = "{$mybb->settings['bburl']}/{$config['admin_dir']}/modules/developer_tools/sandbox/{$mybb->user['uid']}/index.php";
 	}
 
 	$page->extra_header .= <<<EOF

@@ -7,7 +7,6 @@ if (!defined('IN_MYBB')) {
 
 require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions.php';
 define('DEVELOPER_TOOLS_URL', 'index.php?module=developer_tools');
-define('DEVELOPER_TOOLS_SANDBOX_FILE_PATH', MYBB_ADMIN_DIR . 'modules/developer_tools/sandbox/index.php');
 
 function developer_tools_meta()
 {

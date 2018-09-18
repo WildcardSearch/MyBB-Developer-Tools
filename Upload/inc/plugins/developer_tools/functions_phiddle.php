@@ -9,12 +9,14 @@
 
 function developerToolsWriteTemp($userCode)
 {
+	global $mybb;
+
 	$code = <<<EOF
 <?php
 
 define('IN_MYBB', 1);
 define('NO_ONLINE', 1);
-require_once '../../../../global.php';
+require_once '../../../../../global.php';
 
 ini_set('display_errors', '1');
 
@@ -23,7 +25,15 @@ ini_set('display_errors', '1');
 ?>
 
 EOF;
-	file_put_contents(DEVELOPER_TOOLS_SANDBOX_FILE_PATH, $code);
+
+	$folder = MYBB_ADMIN_DIR."modules/developer_tools/sandbox/{$mybb->user['uid']}";
+	if (!file_exists($folder) &&
+		@!mkdir($folder, 0775)) {
+		flash_message('Unable to create sandbox folder.', 'error');
+		admin_redirect($html->url());
+	}
+
+	file_put_contents($folder.'/index.php', $code);
 }
 
 function developerToolsNewProject()

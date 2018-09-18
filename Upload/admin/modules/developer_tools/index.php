@@ -127,8 +127,9 @@ function developer_tools_PHiddle()
 	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
 
 	$title = DEV_TOOLS_DEFAULT_TITLE;
+	$cookieKey = "phiddle_project{$mybb->user['uid']}";
 	$phpCode = ' ';
-	$projectId = (int) $mybb->cookies['phiddle_project'];
+	$projectId = (int) $mybb->cookies[$cookieKey];
 	if ($projectId > 0) {
 		$phiddle = new PhiddleProject($projectId);
 		if ($phiddle->isValid()) {
@@ -174,7 +175,7 @@ function developer_tools_PHiddle()
 				admin_redirect($html->url());
 			}
 
-			my_setcookie('phiddle_project', $id);
+			my_setcookie($cookieKey, $id);
 
 			flash_message('Phiddle saved successfully', 'success');
 			admin_redirect($html->url());
@@ -199,7 +200,7 @@ function developer_tools_PHiddle()
 				admin_redirect($html->url());
 			}
 
-			my_setcookie('phiddle_project', $phiddle->get('id'));
+			my_setcookie($cookieKey, $phiddle->get('id'));
 			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
 			$myCache->update('php_code', $codeArray);
 			
@@ -263,7 +264,7 @@ function developer_tools_PHiddle()
 				admin_redirect($html->url());
 			}
 			
-			my_setcookie('phiddle_project', $id);
+			my_setcookie($cookieKey, $id);
 			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
 			$myCache->update('php_code', $codeArray);
 
@@ -302,6 +303,13 @@ function developer_tools_PHiddle()
 
 	<script src="./jscripts/developer_tools/tabs.js"></script>
 	<script src="./jscripts/developer_tools/PHiddle.js"></script>
+	<script type="text/javascript">
+	<!--
+	DevTools.PHiddle.setup({
+		uid: "{$mybb->user['uid']}",
+	}, {});
+	// -->
+	</script>
 
 <style>
 /* toolbar */

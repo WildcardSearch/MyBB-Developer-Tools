@@ -44,7 +44,7 @@ function developerToolsNewProject()
 
 	$codeArray[$mybb->user['uid']] = '';
 	$myCache->update('php_code', $codeArray);
-	my_setcookie('phiddle_project', 0);
+	my_unsetcookie("phiddle_project{$mybb->user['uid']}");
 }
 
 function developerToolsLoadProject()

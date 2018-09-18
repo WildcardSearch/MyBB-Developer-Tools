@@ -5,6 +5,7 @@ var DevTools = (function($, dt) {
 		tabs,
 
 	options = {
+		uid: 0,
 	},
 
 	lang = {
@@ -60,10 +61,56 @@ var DevTools = (function($, dt) {
 
 		Editor.addPanel($("#toolBarContainer")[0]);
 
+		$("#newButton").click(newOnClick);
+
 		tabs.show(activeTab);
 	}
 
+	function newOnClick(e) {
+		e.preventDefault();
+
+		$.ajax({
+			type: "post",
+			url: "modules/developer_tools/xmlhttp.php",
+			data: {
+				action: "new",
+				mode: "phiddle",
+			},
+			success: newOnSuccess,
+			error: xmlhttpError,
+		});
+	}
+
+	function newOnSuccess() {
+		clear();
+
+		Cookie.unset('phiddle_project'+options.uid);
+		$.jGrowl("PHiddle cleared.", {theme: "jgrowl_success"});
+	}
+
+	function clear() {
+		Editor.setValue("");
+		setPageTitle();
+	}
+
+	function setPageTitle(title) {
+		if (!title) {
+			title = '[New PHiddle]';
+		}
+
+		document.title = "PHiddle — "+title;
+	}
+
+	function xmlhttpError(jqXHR, textStatus, errorThrown) {
+		console.log(jqXHR);
+		$.jGrowl(textStatus+": <br /><br />" + errorThrown, {theme: "jgrowl_error"});
+	}
+
 	$(init);
+
+	dt.PHiddle = {
+		setup: setup,
+	};
 
 	return dt;
 })(jQuery, DevTools || {});

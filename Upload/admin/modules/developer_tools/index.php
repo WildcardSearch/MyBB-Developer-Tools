@@ -18,23 +18,23 @@ if ($mybb->settings['developer_tools_minify_js']) {
 }
 
 $action = $page->active_action;
-$urlExtra = '';
+$urlExtra = '-phiddle';
 if ($action) {
 	$urlExtra = "-{$action}";
 }
 
 // URL, link and image markup generator
-$html = new HTMLGenerator010000(DEVELOPER_TOOLS_URL . $urlExtra, array('ajax'));
+$html = new HTMLGenerator010000(DEVELOPER_TOOLS_URL . $urlExtra);
 
 $modules = developerToolsGetAllModules();
 $moduleActions = array_keys($modules);
 
-$page->add_breadcrumb_item($lang->developer_tools);
-
 if (!in_array($page->active_action, $moduleActions)) {
-	developer_tools_PHiddle();
+	developerToolsPHiddle();
 	exit;
 }
+
+$page->add_breadcrumb_item($lang->developer_tools);
 
 $module = $modules[$action];
 if (!$module->isValid()) {
@@ -120,11 +120,18 @@ exit;
  *
  * @return void
  */
-function developer_tools_PHiddle()
+function developerToolsPHiddle()
 {
 	global $config, $mybb, $db, $page, $html, $lang, $cp_style, $phiddle, $myCache;
 
+	$myCache = DeveloperToolsCache::getInstance();
+
 	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
+
+	if ($mybb->input['mode'] == 'ajax') {
+		developerToolsXmlhttp();
+		exit;
+	}
 
 	$title = DEV_TOOLS_DEFAULT_TITLE;
 	$cookieKey = "phiddle_project{$mybb->user['uid']}";
@@ -140,7 +147,6 @@ function developer_tools_PHiddle()
 		$phiddle = new PhiddleProject();
 	}
 
-	$myCache = DeveloperToolsCache::getInstance();
 	$codeArray = $myCache->read('php_code');
 
 	if (!empty($codeArray[$mybb->user['uid']])) {
@@ -419,6 +425,23 @@ EOF;
 
 	echo '</div>';
 	$page->output_footer();	
+}
+
+function developerToolsXmlhttp()
+{
+	global $mybb;
+
+	switch ($mybb->input['action']) {
+	case 'new':
+		developerToolsNewProject();
+		break;
+	case 'load':
+		developerToolsLoadProject(true);
+		break;
+	case 'doLoad':
+		developerToolsDoLoadProject();
+		break;
+	}
 }
 
 ?>

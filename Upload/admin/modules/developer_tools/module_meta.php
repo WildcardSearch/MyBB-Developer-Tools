@@ -24,7 +24,7 @@ function developer_tools_meta()
 	$subMenu['10'] = array(
 		'id' => 'home',
 		'title' => $lang->developer_tools_admin_home,
-		'link' => 'index.php?module=developer_tools-home',
+		'link' => 'index.php?module=developer_tools-phiddle',
 	);
 
 	$c = 20;

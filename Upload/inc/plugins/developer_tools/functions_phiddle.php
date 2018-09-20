@@ -47,9 +47,9 @@ function developerToolsNewProject()
 	my_unsetcookie("phiddle_project{$mybb->user['uid']}");
 }
 
-function developerToolsLoadProject()
+function developerToolsLoadProject($ajax=false)
 {
-	global $mybb, $lang, $db, $html, $page;
+	global $mybb, $lang, $db, $html, $page, $config;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -57,11 +57,16 @@ function developerToolsLoadProject()
 
 	$selectHtml = developerToolsCreatePhiddleSelect();
 	if (!$selectHtml) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('There are no saved Phiddles to load.', 'error');
 		admin_redirect($html->url());
 	}
 
-	$page->extra_header .= <<<EOF
+	$css = <<<EOF
+
 <style>
 select.phiddleList {
 	margin: 10px;
@@ -69,25 +74,58 @@ select.phiddleList {
 	font-weight: bold;
 }
 </style>
-
 EOF;
 
-	$page->add_breadcrumb_item('Load a PHiddle');
-	$page->output_header("{$lang->developer_tools} &mdash; Load");
+	if ($ajax) {
+		echo <<<EOF
+<div class="modal" style="width: 540px;">
+<script src="jscripts/developer_tools/modal.js" type="text/javascript"></script>{$css}
 
-	$form = new Form($html->url(), 'post');
+EOF;
+	} else {
+		$page->extra_header .= $css;
+		$page->add_breadcrumb_item('Load a PHiddle');
+		$page->output_header("{$lang->developer_tools} &mdash; Load");
+	}
+
+	$form = new Form($html->url(array('action' => 'doLoad')), 'post', 'modal_form');
 	$formContainer = new FormContainer('Open a Phiddle');
 
 	$formContainer->output_row('Select a Phiddle to load', 'select a project from the list', $selectHtml, 'phiddle');
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Load', array('name' => 'load_phiddle'));
+	$buttons[] = $form->generate_submit_button('Load', array('name' => 'load_phiddle', 'id' => 'modalSubmit'));
 	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_load'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
-	$page->output_footer();
+	if ($ajax) {
+		echo "\n</div>\n";
+	} else {
+		$page->output_footer();
+	}
+
+	exit;
+}
+
+function developerToolsDoLoadProject()
+{
+	global $mybb, $myCache;
+
+	$phiddle = new PhiddleProject($mybb->input['phiddle']);
+
+	if (!$phiddle->isValid()) {
+		exit;
+	}
+
+	my_setcookie($cookieKey, $phiddle->get('id'));
+	$codeArray[$mybb->user['uid']] = $phiddle->get('content');
+	$myCache->update('php_code', $codeArray);
+
+	// send our headers.
+	header('Content-type: application/json');
+	echo(json_encode(array('title' => $phiddle->get('title'), 'code' => $codeArray[$mybb->user['uid']])));
 	exit;
 }
 

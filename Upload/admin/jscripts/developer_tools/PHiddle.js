@@ -3,6 +3,7 @@ var DevTools = (function($, dt) {
 
 	var Editor,
 		tabs,
+		url = "index.php?module=developer_tools-phiddle",
 
 	options = {
 		uid: 0,
@@ -62,6 +63,7 @@ var DevTools = (function($, dt) {
 		Editor.addPanel($("#toolBarContainer")[0]);
 
 		$("#newButton").click(newOnClick);
+		$("#loadButton").click(loadOnClick);
 
 		tabs.show(activeTab);
 	}
@@ -71,10 +73,10 @@ var DevTools = (function($, dt) {
 
 		$.ajax({
 			type: "post",
-			url: "modules/developer_tools/xmlhttp.php",
+			url: url,
 			data: {
 				action: "new",
-				mode: "phiddle",
+				mode: "ajax",
 			},
 			success: newOnSuccess,
 			error: xmlhttpError,
@@ -86,6 +88,44 @@ var DevTools = (function($, dt) {
 
 		Cookie.unset('phiddle_project'+options.uid);
 		$.jGrowl("PHiddle cleared.", {theme: "jgrowl_success"});
+	}
+
+	function loadOnClick(e) {
+		e.preventDefault();
+
+		$.get(url+"&mode=ajax&action=load", function(html) {
+			$(html).appendTo("body").modal({
+				fadeDuration: 250,
+				zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),
+			});
+
+			$("#modalSubmit").click(loadOnSubmit);
+		});
+	}
+
+	function loadOnSubmit(e) {
+		e.preventDefault();
+
+		$("#modalSubmit").off("click", loadOnSubmit);
+
+		$.ajax({
+			type: "post",
+			url: $("#modal_form").attr("action") + "&mode=ajax",
+			data: $("#modal_form").serialize(),
+			success: function(data) {
+				$(data).filter("script").each(function(e) {
+					eval($(this).text());
+				});
+				$.modal.close();
+			},
+			success: loadOnSuccess,
+			error: xmlhttpError,
+		});
+	}
+
+	function loadOnSuccess(data) {
+		Editor.setValue(data.code);
+		setPageTitle(data.title);
 	}
 
 	function clear() {
@@ -110,6 +150,7 @@ var DevTools = (function($, dt) {
 
 	dt.PHiddle = {
 		setup: setup,
+		Editor: Editor,
 	};
 
 	return dt;

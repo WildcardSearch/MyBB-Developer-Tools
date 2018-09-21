@@ -36,15 +36,19 @@ EOF;
 	file_put_contents($folder.'/index.php', $code);
 }
 
-function developerToolsNewProject()
+function developerToolsNewProject($keepCode=false)
 {
 	global $mybb, $html, $myCache;
 
-	$codeArray = $myCache->read('php_code');
+	my_unsetcookie("phiddle_project{$mybb->user['uid']}");
 
+	if ($keepCode) {
+		return;
+	}
+
+	$codeArray = $myCache->read('php_code');
 	$codeArray[$mybb->user['uid']] = '';
 	$myCache->update('php_code', $codeArray);
-	my_unsetcookie("phiddle_project{$mybb->user['uid']}");
 }
 
 function developerToolsLoadProject($ajax=false)
@@ -214,7 +218,7 @@ EOF;
 	exit;
 }
 
-function developerToolsDeleteProject()
+function developerToolsDeleteProject($ajax=false)
 {
 	global $mybb, $lang, $db, $html, $page;
 
@@ -224,38 +228,113 @@ function developerToolsDeleteProject()
 
 	$selectHtml = developerToolsCreatePhiddleSelect('', true);
 	if (!$selectHtml) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('There are no saved Phiddles to delete.', 'error');
 		admin_redirect($html->url());
 	}
 
-	$page->extra_header .= <<<EOF
+	$css = <<<EOF
+
 <style>
 select.phiddleList {
 	margin: 10px;
 	font-size: 1.2em;
-	font-weight: bold;
 }
 </style>
-
 EOF;
 
-	$page->add_breadcrumb_item('Delete a PHiddle');
-	$page->output_header("{$lang->developer_tools} &mdash; Delete");
+	if ($ajax) {
+		echo <<<EOF
+<div class="modal" style="width: 540px;">{$css}
 
-	$form = new Form($html->url(), 'post');
+EOF;
+	} else {
+		$page->extra_header .= $css;
+		$page->add_breadcrumb_item('Delete a PHiddle');
+		$page->output_header("{$lang->developer_tools} &mdash; Delete");
+	}
+
+	$form = new Form($html->url(array('action' => 'doDelete')), 'post', 'modal_form');
 	$formContainer = new FormContainer('Delete a Phiddle');
 
-	$formContainer->output_row('Select a Phiddle to delete', 'select one or more projects from the list', $selectHtml, 'phiddle');
+	$formContainer->output_row('Select one or more Phiddles to delete', 'select one or more projects from the list', $selectHtml, 'phiddle');
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Delete', array('name' => 'delete_phiddle'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_delete'));
+	$buttons[] = $form->generate_submit_button('Delete', array('name' => 'delete_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_delete', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
-	$page->output_footer();
+	if ($ajax) {
+		echo "\n</div>\n";
+	} else {
+		$page->output_footer();
+	}
+
 	exit;
+}
+
+function developerToolsDoDeleteProject($ajax=false)
+{
+	global $mybb, $html;
+
+	$errorCount = 0;
+	$successCount = 0;
+	$deletedIds = array();
+	$deletedCurrentProject = false;
+	foreach ((array) $mybb->input['phiddle'] as $id) {
+		$phiddle = new PhiddleProject($id);
+
+		if (!$phiddle->isValid()) {
+			$errorCount++;
+			continue;
+		}
+
+		$result = $phiddle->remove();
+
+		if (!$result) {
+			$errorCount++;
+			continue;
+		}
+
+		if ($id == $projectId) {
+			$deletedCurrentProject = true;
+		}
+
+		$deletedIds[] = $id;
+		$successCount++;
+	}
+
+	if ($deletedCurrentProject) {
+		developerToolsNewProject(true);
+	}
+
+	if ($ajax) {
+		$data = array(
+			'deleted' => $successCount,
+			'failed' => $errorCount,
+			'deletedIds' => $deletedIds,
+		);
+
+		// send our headers.
+		header('Content-type: application/json');
+		echo(json_encode($data));
+		exit;
+	}
+
+	if ($errorCount) {
+		flash_message($lang->sprintf('{1} PHiddle(s) could not be successfully deleted.', $errorCount), 'error');
+	}
+
+	if ($successCount) {
+		flash_message($lang->sprintf('{1} PHiddle(s) successfully deleted.', $successCount), 'success');
+	}
+
+	admin_redirect($html->url());
 }
 
 function developerToolsImportProject()

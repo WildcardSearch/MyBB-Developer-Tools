@@ -213,45 +213,7 @@ function developerToolsPHiddle()
 			flash_message('PHiddle successfully loaded.', 'success');
 			admin_redirect($html->url());
 		} elseif (isset($mybb->input['delete_phiddle'])) {
-			$deletedCurrentProject = false;
-
-			$errorCount = 0;
-			$successCount = 0;
-			foreach ((array) $mybb->input['phiddle'] as $id) {
-				$phiddle = new PhiddleProject($id);
-
-				if (!$phiddle->isValid()) {
-					$errorCount++;
-					continue;
-				}
-
-				$result = $phiddle->remove();
-
-				if (!$result) {
-					$errorCount++;
-					continue;
-				}
-
-				if ($id == $projectId) {
-					$deletedCurrentProject = true;
-				}
-
-				$successCount++;
-			}
-
-			if ($deletedCurrentProject) {
-				developerToolsNewProject();
-			}
-
-			if ($errorCount) {
-				flash_message($lang->sprintf('{1} PHiddle(s) could not be successfully deleted.', $errorCount), 'error');
-			}
-
-			if ($successCount) {
-				flash_message($lang->sprintf('{1} PHiddle(s) successfully deleted.', $successCount), 'success');
-			}
-
-			admin_redirect($html->url());
+			developerToolsDoDeleteProject();
 		} elseif (isset($mybb->input['importButton'])) {
 			developerToolsImportProject();
 		} elseif (isset($mybb->input['import_phiddle'])) {
@@ -452,6 +414,12 @@ function developerToolsXmlhttp()
 		break;
 	case 'saveAs':
 		developerToolsSaveProjectAs(true);
+		break;
+	case 'delete':
+		developerToolsDeleteProject(true);
+		break;
+	case 'doDelete':
+		developerToolsDoDeleteProject(true);
 		break;
 	}
 }

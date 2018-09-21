@@ -13,6 +13,8 @@ var DevTools = (function($, dt) {
 	},
 
 	lang = {
+		phiddle_deleted: 'Phiddle deleted.',
+		phiddles_deleted: 'Phiddles deleted.',
 	};
 
 	function setup(o, l) {
@@ -72,6 +74,7 @@ var DevTools = (function($, dt) {
 		$("#loadButton").click(loadOnClick);
 		$("#saveButton").click(saveOnClick);
 		$("#saveAsButton").click(saveAsOnClick);
+		$("#deleteButton").click(deleteOnClick);
 
 		tabs.show(activeTab);
 	}
@@ -202,16 +205,75 @@ var DevTools = (function($, dt) {
 		$.modal.close();
 	}
 
+	function deleteOnClick(e) {
+		e.preventDefault();
+
+		$.get(url+"&mode=ajax&action=delete", function(html) {
+			$(html).appendTo("body").modal({
+				fadeDuration: 250,
+				zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),
+			});
+
+			$("#modalSubmit").one("click", deleteOnSubmit);
+			$("#modalCancel").one("click", cancelOnClick);
+		});
+	}
+
+	function deleteOnSubmit(e) {
+		e.preventDefault();
+
+		$.ajax({
+			type: "post",
+			url: $("#modal_form").attr("action") + "&mode=ajax",
+			data: $("#modal_form").serialize(),
+			success: deleteOnSuccess,
+			error: xmlhttpError,
+		});
+	}
+
+	function deleteOnSuccess(data) {
+		var successLanguage = "PHiddle successfully deleted.",
+			errorLanguage = "PHiddle could not be deleted successfully.";
+
+		if (data.deleted > 0 &&
+			data.deletedIds.length &&
+			data.deletedIds.indexOf(projectId) != -1) {
+			clear(true);
+		}
+
+		$.modal.close();
+
+		if (data.deleted > 0) {
+			if (data.deleted > 1) {
+				successLanguage = "PHiddles successfully deleted.";
+			}
+			$.jGrowl(data.deleted+" "+successLanguage, {theme: "jgrowl_success"});
+		}
+
+		if (!data.failed) {
+			return;
+		}
+
+		if (data.failed > 1) {
+			errorLanguage = "PHiddles could not be deleted successfully.";
+		}
+		$.jGrowl(data.failed+" "+errorLanguage, {theme: "jgrowl_error"});
+	}
+
 	function cancelOnClick(e) {
 		e.preventDefault();
 
 		$.modal.close();
 	}
 
-	function clear() {
-		Editor.setValue("");
+	function clear(keepCode) {
+		if (!keepCode) {
+			Editor.setValue("");
+		}
+
 		Cookie.unset(cookieKey);
 		setPageTitle();
+		projectId = 0;
 	}
 
 	function setPageTitle(title) {

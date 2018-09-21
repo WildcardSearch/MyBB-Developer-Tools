@@ -4,6 +4,9 @@ var DevTools = (function($, dt) {
 	var Editor,
 		tabs,
 		url = "index.php?module=developer_tools-phiddle",
+		projectId = 0,
+		projectTitle = "",
+		cookieKey = "",
 
 	options = {
 		uid: 0,
@@ -15,6 +18,9 @@ var DevTools = (function($, dt) {
 	function setup(o, l) {
 		$.extend(options, o || {});
 		$.extend(lang, l || {});
+
+		projectId = parseInt(options.id, 10);
+		cookieKey = "phiddle_project"+options.uid;
 	}
 
 	function init() {
@@ -26,7 +32,7 @@ var DevTools = (function($, dt) {
 		tabs.getActive();
 		activeTab = tabs.active;
 
-		tabs.show('php');
+		tabs.show("php");
 		Editor = CodeMirror.fromTextArea($("#php_code")[0], {
 			mode: "text/x-php",
 			theme: "blackboard",
@@ -64,6 +70,8 @@ var DevTools = (function($, dt) {
 
 		$("#newButton").click(newOnClick);
 		$("#loadButton").click(loadOnClick);
+		$("#saveButton").click(saveOnClick);
+		$("#saveAsButton").click(saveAsOnClick);
 
 		tabs.show(activeTab);
 	}
@@ -86,7 +94,6 @@ var DevTools = (function($, dt) {
 	function newOnSuccess() {
 		clear();
 
-		Cookie.unset('phiddle_project'+options.uid);
 		$.jGrowl("PHiddle cleared.", {theme: "jgrowl_success"});
 	}
 
@@ -99,43 +106,120 @@ var DevTools = (function($, dt) {
 				zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),
 			});
 
-			$("#modalSubmit").click(loadOnSubmit);
+			$("#modalSubmit").one("click", loadOnSubmit);
+			$("#modalCancel").one("click", cancelOnClick);
 		});
 	}
 
 	function loadOnSubmit(e) {
 		e.preventDefault();
 
-		$("#modalSubmit").off("click", loadOnSubmit);
-
 		$.ajax({
 			type: "post",
 			url: $("#modal_form").attr("action") + "&mode=ajax",
 			data: $("#modal_form").serialize(),
-			success: function(data) {
-				$(data).filter("script").each(function(e) {
-					eval($(this).text());
-				});
-				$.modal.close();
-			},
 			success: loadOnSuccess,
 			error: xmlhttpError,
 		});
 	}
 
 	function loadOnSuccess(data) {
+		$.modal.close();
+		projectId = data.id;
 		Editor.setValue(data.code);
 		setPageTitle(data.title);
+		Cookie.set(cookieKey, projectId);
+		$.jGrowl("PHiddle loaded.", {theme: "jgrowl_success"});
+	}
+
+	function saveOnClick(e) {
+		if (!projectId) {
+			saveAsOnClick(e);
+		}
+
+		e.preventDefault();
+
+		$.ajax({
+			type: "post",
+			url: url,
+			data: {
+				action: "save",
+				mode: "ajax",
+				id: projectId,
+				title: projectTitle,
+				php_code: Editor.getValue(),
+			},
+			success: saveOnSuccess,
+			error: xmlhttpError,
+		});
+	}
+
+	function saveOnSuccess(data) {
+		$.jGrowl("PHiddle saved.", {theme: "jgrowl_success"});
+	}
+
+	function saveAsOnClick(e) {
+		e.preventDefault();
+
+		$.ajax({
+			type: "post",
+			url: url,
+			data: {
+				action: "saveAs",
+				mode: "ajax",
+				php_code: Editor.getValue(),
+			},
+			success: function(html) {
+				$(html).appendTo("body").modal({
+					fadeDuration: 250,
+					zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),
+				});
+
+				$("#modalSubmit").one("click", saveAsOnSubmit);
+				$("#modalCancel").one("click", cancelOnClick);
+			},
+			error: xmlhttpError,
+		});
+	}
+
+	function saveAsOnSubmit(e) {
+		e.preventDefault();
+
+		$.ajax({
+			type: "post",
+			url: $("#modal_form").attr("action") + "&mode=ajax",
+			data: $("#modal_form").serialize(),
+			success: saveAsOnSuccess,
+			error: xmlhttpError,
+		});
+	}
+
+	function saveAsOnSuccess(data) {
+		projectId = data.id;
+		setPageTitle(data.title);
+		Cookie.set(cookieKey, projectId);
+		$.jGrowl("PHiddle saved.", {theme: "jgrowl_success"});
+		$.modal.close();
+	}
+
+	function cancelOnClick(e) {
+		e.preventDefault();
+
+		$.modal.close();
 	}
 
 	function clear() {
 		Editor.setValue("");
+		Cookie.unset(cookieKey);
 		setPageTitle();
 	}
 
 	function setPageTitle(title) {
 		if (!title) {
+			projectTitle = '';
 			title = '[New PHiddle]';
+		} else {
+			projectTitle = title;
 		}
 
 		document.title = "PHiddle — "+title;

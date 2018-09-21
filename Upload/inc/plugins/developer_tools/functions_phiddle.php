@@ -71,15 +71,13 @@ function developerToolsLoadProject($ajax=false)
 select.phiddleList {
 	margin: 10px;
 	font-size: 1.2em;
-	font-weight: bold;
 }
 </style>
 EOF;
 
 	if ($ajax) {
 		echo <<<EOF
-<div class="modal" style="width: 540px;">
-<script src="jscripts/developer_tools/modal.js" type="text/javascript"></script>{$css}
+<div class="modal" style="width: 540px;">{$css}
 
 EOF;
 	} else {
@@ -96,7 +94,7 @@ EOF;
 	$formContainer->end();
 
 	$buttons[] = $form->generate_submit_button('Load', array('name' => 'load_phiddle', 'id' => 'modalSubmit'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_load'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_load', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
@@ -123,15 +121,30 @@ function developerToolsDoLoadProject()
 	$codeArray[$mybb->user['uid']] = $phiddle->get('content');
 	$myCache->update('php_code', $codeArray);
 
+	$data = array(
+		'id' => $phiddle->get('id'),
+		'title' => $phiddle->get('title'),
+		'code' => $codeArray[$mybb->user['uid']],
+	);
+
 	// send our headers.
 	header('Content-type: application/json');
-	echo(json_encode(array('title' => $phiddle->get('title'), 'code' => $codeArray[$mybb->user['uid']])));
+	echo(json_encode($data));
 	exit;
 }
 
-function developerToolsSaveProject()
+function developerToolsSaveProject($ajax=false, $new=false)
 {
 	global $mybb, $db, $phiddle, $myCache, $html;
+
+	if ($ajax && !$new) {
+		$phiddle = new PhiddleProject($mybb->input['id']);
+	}
+
+	if ($new) {
+		$phiddle = new PhiddleProject();
+		$phiddle->set('title', $mybb->input['title']);
+	}
 
 	$phiddle->set('content', $mybb->input['php_code']);
 	$phiddle->save();
@@ -141,11 +154,24 @@ function developerToolsSaveProject()
 	$codeArray[$mybb->user['uid']] = $mybb->input['php_code'];
 	$myCache->update('php_code', $codeArray);
 
-	flash_message('Phiddle saved successfully', 'success');
-	admin_redirect($html->url());
+	if (!$ajax) {
+		flash_message('Phiddle saved successfully', 'success');
+		admin_redirect($html->url());
+	}
+
+	$data = array(
+		'id' => $phiddle->get('id'),
+		'title' => $phiddle->get('title'),
+		'code' => $codeArray[$mybb->user['uid']],
+	);
+
+	// send our headers.
+	header('Content-type: application/json');
+	echo(json_encode($data));
+	exit;
 }
 
-function developerToolsSaveProjectAs()
+function developerToolsSaveProjectAs($ajax=false)
 {
 	global $mybb, $lang, $db, $html, $page, $phiddle, $myCache;
 
@@ -157,22 +183,34 @@ function developerToolsSaveProjectAs()
 	$codeArray[$mybb->user['uid']] = $mybb->input['php_code'];
 	$myCache->update('php_code', $codeArray);
 
-	$page->add_breadcrumb_item('Save PHiddle As...');
-	$page->output_header("{$lang->developer_tools} &mdash; Save As...");
+	if ($ajax) {
+		echo <<<EOF
+<div class="modal" style="width: 540px;">
 
-	$form = new Form($html->url(), 'post');
+EOF;
+	} else {
+		$page->add_breadcrumb_item('Save PHiddle As...');
+		$page->output_header("{$lang->developer_tools} &mdash; Save As...");
+	}
+
+	$form = new Form($html->url(array('action' => 'save')), 'post', 'modal_form');
 	$formContainer = new FormContainer('Save PHiddle As...');
 
-	$formContainer->output_row('Title', 'enter a title for your PHiddle here', $form->generate_text_box('title', ''));
+	$formContainer->output_row('Title', 'enter a title for your PHiddle here', $form->generate_text_box('title', '', array('id' => 'saveAsTitle')).$form->generate_hidden_field('id', $mybb->input['id']).$form->generate_hidden_field('php_code', $mybb->input['php_code']).$form->generate_hidden_field('new', 1));
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Save', array('name' => 'save_phiddle'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_save'));
+	$buttons[] = $form->generate_submit_button('Save', array('name' => 'save_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_save', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
-	$page->output_footer();
+	if ($ajax) {
+		echo "\n</div>\n";
+	} else {
+		$page->output_footer();
+	}
+
 	exit;
 }
 

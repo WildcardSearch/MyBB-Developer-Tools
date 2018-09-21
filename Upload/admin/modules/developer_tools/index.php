@@ -128,11 +128,6 @@ function developerToolsPHiddle()
 
 	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
 
-	if ($mybb->input['mode'] == 'ajax') {
-		developerToolsXmlhttp();
-		exit;
-	}
-
 	$title = DEV_TOOLS_DEFAULT_TITLE;
 	$cookieKey = "phiddle_project{$mybb->user['uid']}";
 	$phpCode = ' ';
@@ -145,6 +140,11 @@ function developerToolsPHiddle()
 		}
 	} else {
 		$phiddle = new PhiddleProject();
+	}
+
+	if ($mybb->input['mode'] == 'ajax') {
+		developerToolsXmlhttp();
+		exit;
 	}
 
 	$codeArray = $myCache->read('php_code');
@@ -313,6 +313,7 @@ function developerToolsPHiddle()
 	<!--
 	DevTools.PHiddle.setup({
 		uid: "{$mybb->user['uid']}",
+		id: "{$id}",
 	}, {});
 	// -->
 	</script>
@@ -431,6 +432,11 @@ function developerToolsXmlhttp()
 {
 	global $mybb;
 
+	$new = false;
+	if (isset($mybb->input['new'])) {
+		$new = true;
+	}
+
 	switch ($mybb->input['action']) {
 	case 'new':
 		developerToolsNewProject();
@@ -440,6 +446,12 @@ function developerToolsXmlhttp()
 		break;
 	case 'doLoad':
 		developerToolsDoLoadProject();
+		break;
+	case 'save':
+		developerToolsSaveProject(true, $new);
+		break;
+	case 'saveAs':
+		developerToolsSaveProjectAs(true);
 		break;
 	}
 }

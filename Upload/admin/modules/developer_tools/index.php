@@ -1,8 +1,8 @@
 <?php
 
 // Disallow direct access to this file for security reasons
-if (!defined("IN_MYBB")) {
-	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
+if (!defined('IN_MYBB')) {
+	die('Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.');
 }
 
 global $mybb, $page, $lang, $html, $modules, $min;
@@ -326,7 +326,7 @@ input.previewButton {
 EOF;
 
 	$page->add_breadcrumb_item($lang->developer_tools_admin_home);
-	$page->output_header($lang->developer_tools_admin_home . " &mdash; {$title}");
+	$page->output_header("{$lang->developer_tools_admin_home} &mdash; {$title}");
 
 	echo <<<EOF
 	<div id="quick_tab_main">
@@ -360,7 +360,7 @@ EOF;
 		</div>
 EOF;
 
-	echo($form->generate_text_area('php_code', $phpCode | ' ', array('rows' => 11, "columns" => 145, 'id' => 'php_code')));
+	echo($form->generate_text_area('php_code', $phpCode | ' ', array('rows' => 11, 'columns' => 145, 'id' => 'php_code')));
 
 	echo <<<EOF
 

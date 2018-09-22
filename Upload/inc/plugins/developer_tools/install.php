@@ -79,7 +79,7 @@ EOF;
         'author' => $author,
         'authorsite' => 'http://www.rantcentralforums.com/',
 		'compatibility' => '18*',
-		"codename" => 'developer_tools',
+		'codename' => 'developer_tools',
     );
 }
 
@@ -181,7 +181,7 @@ function developerToolsGetSettingsgroup()
 		global $db;
 
 		// otherwise we will have to query the db
-		$query = $db->simple_select("settinggroups", "gid", "name='developer_tools_settings'");
+		$query = $db->simple_select('settinggroups', 'gid', "name='developer_tools_settings'");
 		$gid = (int) $db->fetch_field($query, 'gid');
 	}
 	return $gid;
@@ -286,8 +286,8 @@ function developerToolsIsWritable($rootFolder)
 			continue;
 		}
 
-		if (!is_writeable($rootFolder . $folder . "/") ||
-			!developerToolsIsWritable($rootFolder . $folder . "/")) {
+		if (!is_writeable($rootFolder . $folder . '/') ||
+			!developerToolsIsWritable($rootFolder . $folder . '/')) {
 			return false;
 		}
 	}

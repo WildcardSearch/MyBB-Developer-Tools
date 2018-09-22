@@ -85,16 +85,16 @@ function developer_tools_admin_permissions()
 	}
 
 	$admin_permissions = array(
-		"developer_tools" => $lang->developer_tools_admin_permissions_desc,
+		'developer_tools' => $lang->developer_tools_admin_permissions_desc,
 	);
 
 	foreach ((array) developerToolsGetAllModules() as $key => $module) {
 		$admin_permissions[$key] = $lang->sprintf($lang->developer_tools_page_permissions_desc, $module->get('title'));
 	}
 
-	$admin_permissions = $plugins->run_hooks("admin_developer_tools_permissions", $admin_permissions);
+	$admin_permissions = $plugins->run_hooks('admin_developer_tools_permissions', $admin_permissions);
 
-	return array("name" => $lang->developer_tools, "permissions" => $admin_permissions, "disporder" => 100);
+	return array('name' => $lang->developer_tools, 'permissions' => $admin_permissions, 'disporder' => 100);
 }
 
 /**

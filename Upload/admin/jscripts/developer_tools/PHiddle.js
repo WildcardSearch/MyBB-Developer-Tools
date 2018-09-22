@@ -438,7 +438,7 @@ var DevTools = (function($, dt) {
 
 		e.preventDefault();
 
-		data.append('file', $("#fileData").prop("files")[0]);
+		data.append("file", $("#fileData").prop("files")[0]);
 
 		$.ajax({
 			type: "post",
@@ -543,7 +543,7 @@ var DevTools = (function($, dt) {
 	 */
 	function setPageTitle(title) {
 		if (!title) {
-			projectTitle = '';
+			projectTitle = "";
 			title = lang.default_title;
 		} else {
 			projectTitle = title;

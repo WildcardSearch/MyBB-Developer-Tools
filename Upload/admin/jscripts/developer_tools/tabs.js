@@ -30,24 +30,24 @@ var DevTools = (function($, dt) {
 
 			if (!tabs ||
 				tabs.length == 0 ||
-				$('#quick_tab_' + name).length == 0) {
+				$("#quick_tab_" + name).length == 0) {
 				return;
 			}
 
 			this.name = name;
 			this.tabs = [];
-			this.$container = $('#quick_tab_' + name);
+			this.$container = $("#quick_tab_" + name);
 
 			for (t = 0; t < tabs.length; t++) {
-				lName = 'qt_link_' + name + '_' + tabs[t];
-				bName = 'qt_body_' + name + '_' + tabs[t];
-				if (!$('#' + lName) ||
-					!$('#' + bName)) {
+				lName = "qt_link_" + name + "_" + tabs[t];
+				bName = "qt_body_" + name + "_" + tabs[t];
+				if (!$("#" + lName) ||
+					!$("#" + bName)) {
 					return;
 				}
 				this.tabs[tabs[t]] = {
-					link: $('#' + lName),
-					body: $('#' + bName),
+					link: $("#" + lName),
+					body: $("#" + bName),
 				};
 				if (!this.active) {
 					this.active = tabs[t];
@@ -68,7 +68,7 @@ var DevTools = (function($, dt) {
 			var property;
 			for (property in this.tabs) {
 				if (this.tabs.hasOwnProperty(property)) {
-					this.tabs[property].link.children('a').click($.proxy(this.doClick, this));
+					this.tabs[property].link.children("a").click($.proxy(this.doClick, this));
 				}
 			}
 		}
@@ -82,11 +82,11 @@ var DevTools = (function($, dt) {
 		function doClick(event) {
 			var target = event.target;
 			event.preventDefault();
-			if (!target || target.nodeName != 'A') {
+			if (!target || target.nodeName != "A") {
 				return;
 			}
 
-			this.show($(target).parent()[0].getAttribute('name'));
+			this.show($(target).parent()[0].getAttribute("name"));
 		}
 
 		/**
@@ -97,11 +97,11 @@ var DevTools = (function($, dt) {
 		function getActive() {
 			var pieces;
 
-			if (window.location.href.indexOf('#') == -1) {
+			if (window.location.href.indexOf("#") == -1) {
 				return;
 			}
 
-			pieces = window.location.href.split('#');
+			pieces = window.location.href.split("#");
 			if (pieces.length <= 1) {
 				return;
 			}
@@ -187,8 +187,8 @@ var DevTools = (function($, dt) {
 				return;
 			}
 
-			t.link.children('a').hide();
-			t.link.children('span').show();
+			t.link.children("a").hide();
+			t.link.children("span").show();
 			t.body.show();
 		}
 
@@ -209,8 +209,8 @@ var DevTools = (function($, dt) {
 				!t.body) {
 				return;
 			}
-			t.link.children('a').show();
-			t.link.children('span').hide();
+			t.link.children("a").show();
+			t.link.children("span").hide();
 			t.body.hide();
 		}
 

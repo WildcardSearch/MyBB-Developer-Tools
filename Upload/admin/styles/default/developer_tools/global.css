@@ -1,0 +1,37 @@
+/*
+ * Plugin Name: Developer Tools for MyBB 1.8.x
+ * Copyright 2018 WildcardSearch
+ * http://www.rantcentralforums.com
+ *
+ * this file contains global style information
+ */
+
+iframe.outputFrame {
+	height: 500px;
+	width: 100%;
+	overflow-y: auto;
+}
+	
+/* CodeMirror */
+
+.CodeMirror {
+	font-size: 1.8em;
+	height: 400px;
+	padding: 7px 0px 0px 2px;
+}
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+	outline: none;
+	color: #ffff4c !important;
+	font-weight: bold;
+}
+
+.cm-matchhighlight {
+	background-color: yellow;
+	color: black;
+	font-weight: bold;
+}
+
+iframe {
+	border: none;
+}

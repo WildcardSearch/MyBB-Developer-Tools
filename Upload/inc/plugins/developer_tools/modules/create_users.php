@@ -72,6 +72,12 @@ EOF
 				'optionscode' => 'yesno',
 				'value' => '0',
 			),
+			'referrer' => array(
+				'title' => $lang->developer_tools_create_users_referrer_title,
+				'description' => $lang->developer_tools_create_users_referrer_desc,
+				'optionscode' => 'text',
+				'value' => '',
+			),
 		),
 	);
 }
@@ -90,7 +96,7 @@ function developer_tools_create_users_execute($settings)
 	if ($amount == 0) {
 		$amount = 10;
 	}
-	
+
 	// Set up user handler.
 	require_once MYBB_ROOT . 'inc/datahandlers/user.php';
 
@@ -121,14 +127,15 @@ function developer_tools_create_users_execute($settings)
 		'email2' => $email,
 		'usergroup' => $usergroup,
 		'regip' => '127.0.0.1',
-		'longregip' => my_ip2long('127.0.0.1')
+		'longregip' => my_ip2long('127.0.0.1'),
+		'referrer' => $referrer,
 	);
 
 	$addedNames = '';
 	$addedNameCount = 0;
 	while ($addedNameCount < $amount) {
 		$userhandler = new UserDataHandler('insert');
-		$user['username'] = assembleName($name_count, $caps);
+		$user['username'] = developerToolsCreateUsersAssembleName($name_count, $caps);
 		$userhandler->set_data($user);
 		if (!$userhandler->validate_user()) {
 			continue;
@@ -137,7 +144,7 @@ function developer_tools_create_users_execute($settings)
 		$userhandler->insert_user();
 		$addedNameCount++;
 	}
-	
+
 	flash_message($lang->sprintf($lang->developer_tools_create_users_success_message, $addedNameCount), 'success');
 	admin_redirect($html->url());
 }
@@ -149,18 +156,18 @@ function developer_tools_create_users_execute($settings)
  * @param  bool
  * @return string
  */
-function assembleName($maxNames, $caps)
+function developerToolsCreateUsersAssembleName($maxNames, $caps)
 {
 	global $mybb, $firstNames, $lastNames;
 
 	$names = array();
 	if ($maxNames <= 1) {
-		$names[] = getName($firstNames, $caps);
+		$names[] = developerToolsCreateUsersGetName($firstNames, $caps);
 	} else {
 		while (count($names) < ($maxNames - 1)) {
-			$names[] = getName($firstNames, $caps, $leet, $special);
+			$names[] = developerToolsCreateUsersGetName($firstNames, $caps, $leet, $special);
 		}
-		$names[] = getName($lastNames, $caps);
+		$names[] = developerToolsCreateUsersGetName($lastNames, $caps);
 	}
 
 	while (count($names) > 1 &&
@@ -177,7 +184,7 @@ function assembleName($maxNames, $caps)
  * @param  bool
  * @return string
  */
-function getName($names, $caps = false)
+function developerToolsCreateUsersGetName($names, $caps = false)
 {
 	$name = mb_strtolower($names[rand(0, count($names) - 1)]);
 

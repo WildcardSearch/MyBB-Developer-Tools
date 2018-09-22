@@ -74,7 +74,7 @@ function developer_tools_create_threads_execute($settings)
 	$threadCount = (int) $settings['threadcount'];
 	$postCount = (int) ($settings['postcount'] + 1);
 	$totalUsers = (int) $threadCount + $postCount;
-	getRandomUser($totalUsers);
+	developerToolsCreateThreadsGetRandomUser($totalUsers);
 
 	$fid = (int) $settings['fid'];
 
@@ -128,7 +128,7 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 {
 	global $mybb, $session, $li;
 
-	$user = getRandomUser();
+	$user = developerToolsCreateThreadsGetRandomUser();
 
 	// Set up posthandler.
 	require_once MYBB_ROOT."inc/datahandlers/post.php";
@@ -161,7 +161,7 @@ function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $me
 {
 	global $mybb, $session;
 
-	$user = getRandomUser();
+	$user = developerToolsCreateThreadsGetRandomUser();
 
 	// Set up posthandler.
 	require_once MYBB_ROOT."inc/datahandlers/post.php";
@@ -190,7 +190,7 @@ function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $me
 	return $postinfo['pid'];
 }
 
-function getRandomUser($totalUsers=null)
+function developerToolsCreateThreadsGetRandomUser($totalUsers=null)
 {
 	global $db;
 

@@ -9,12 +9,14 @@
 
 function developerToolsWriteTemp($userCode)
 {
+	global $mybb;
+
 	$code = <<<EOF
 <?php
 
 define('IN_MYBB', 1);
 define('NO_ONLINE', 1);
-require_once '../../../../global.php';
+require_once '../../../../../global.php';
 
 ini_set('display_errors', '1');
 
@@ -23,23 +25,35 @@ ini_set('display_errors', '1');
 ?>
 
 EOF;
-	file_put_contents(DEVELOPER_TOOLS_SANDBOX_FILE_PATH, $code);
+
+	$folder = MYBB_ADMIN_DIR."modules/developer_tools/sandbox/{$mybb->user['uid']}";
+	if (!file_exists($folder) &&
+		@!mkdir($folder, 0775)) {
+		flash_message('Unable to create sandbox folder.', 'error');
+		admin_redirect($html->url());
+	}
+
+	file_put_contents($folder.'/index.php', $code);
 }
 
-function developerToolsNewProject()
+function developerToolsNewProject($keepCode=false)
 {
 	global $mybb, $html, $myCache;
 
-	$codeArray = $myCache->read('php_code');
+	my_unsetcookie("phiddle_project{$mybb->user['uid']}");
 
+	if ($keepCode) {
+		return;
+	}
+
+	$codeArray = $myCache->read('php_code');
 	$codeArray[$mybb->user['uid']] = '';
 	$myCache->update('php_code', $codeArray);
-	my_setcookie('phiddle_project', 0);
 }
 
-function developerToolsLoadProject()
+function developerToolsLoadProject($ajax=false)
 {
-	global $mybb, $lang, $db, $html, $page;
+	global $mybb, $lang, $db, $html, $page, $config;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -47,43 +61,94 @@ function developerToolsLoadProject()
 
 	$selectHtml = developerToolsCreatePhiddleSelect();
 	if (!$selectHtml) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('There are no saved Phiddles to load.', 'error');
 		admin_redirect($html->url());
 	}
 
-	$page->extra_header .= <<<EOF
+	$css = <<<EOF
+
 <style>
 select.phiddleList {
 	margin: 10px;
 	font-size: 1.2em;
-	font-weight: bold;
 }
 </style>
-
 EOF;
 
-	$page->add_breadcrumb_item('Load a PHiddle');
-	$page->output_header("{$lang->developer_tools} &mdash; Load");
+	if ($ajax) {
+		echo <<<EOF
+<div class="modal" style="width: 540px;">{$css}
 
-	$form = new Form($html->url(), 'post');
+EOF;
+	} else {
+		$page->extra_header .= $css;
+		$page->add_breadcrumb_item('Load a PHiddle');
+		$page->output_header("{$lang->developer_tools} &mdash; Load");
+	}
+
+	$form = new Form($html->url(array('action' => 'doLoad')), 'post', 'modal_form');
 	$formContainer = new FormContainer('Open a Phiddle');
 
 	$formContainer->output_row('Select a Phiddle to load', 'select a project from the list', $selectHtml, 'phiddle');
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Load', array('name' => 'load_phiddle'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_load'));
+	$buttons[] = $form->generate_submit_button('Load', array('name' => 'load_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_load', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
-	$page->output_footer();
+	if ($ajax) {
+		echo "\n</div>\n";
+	} else {
+		$page->output_footer();
+	}
+
 	exit;
 }
 
-function developerToolsSaveProject()
+function developerToolsDoLoadProject()
+{
+	global $mybb, $myCache;
+
+	$phiddle = new PhiddleProject($mybb->input['phiddle']);
+
+	if (!$phiddle->isValid()) {
+		exit;
+	}
+
+	my_setcookie($cookieKey, $phiddle->get('id'));
+	$codeArray[$mybb->user['uid']] = $phiddle->get('content');
+	$myCache->update('php_code', $codeArray);
+
+	$data = array(
+		'id' => $phiddle->get('id'),
+		'title' => $phiddle->get('title'),
+		'code' => $codeArray[$mybb->user['uid']],
+	);
+
+	// send our headers.
+	header('Content-type: application/json');
+	echo(json_encode($data));
+	exit;
+}
+
+function developerToolsSaveProject($ajax=false, $new=false)
 {
 	global $mybb, $db, $phiddle, $myCache, $html;
+
+	if ($ajax && !$new) {
+		$phiddle = new PhiddleProject($mybb->input['id']);
+	}
+
+	if ($new) {
+		$phiddle = new PhiddleProject();
+		$phiddle->set('title', $mybb->input['title']);
+	}
 
 	$phiddle->set('content', $mybb->input['php_code']);
 	$phiddle->save();
@@ -93,11 +158,24 @@ function developerToolsSaveProject()
 	$codeArray[$mybb->user['uid']] = $mybb->input['php_code'];
 	$myCache->update('php_code', $codeArray);
 
-	flash_message('Phiddle saved successfully', 'success');
-	admin_redirect($html->url());
+	if (!$ajax) {
+		flash_message('Phiddle saved successfully', 'success');
+		admin_redirect($html->url());
+	}
+
+	$data = array(
+		'id' => $phiddle->get('id'),
+		'title' => $phiddle->get('title'),
+		'code' => $codeArray[$mybb->user['uid']],
+	);
+
+	// send our headers.
+	header('Content-type: application/json');
+	echo(json_encode($data));
+	exit;
 }
 
-function developerToolsSaveProjectAs()
+function developerToolsSaveProjectAs($ajax=false)
 {
 	global $mybb, $lang, $db, $html, $page, $phiddle, $myCache;
 
@@ -109,26 +187,38 @@ function developerToolsSaveProjectAs()
 	$codeArray[$mybb->user['uid']] = $mybb->input['php_code'];
 	$myCache->update('php_code', $codeArray);
 
-	$page->add_breadcrumb_item('Save PHiddle As...');
-	$page->output_header("{$lang->developer_tools} &mdash; Save As...");
+	if ($ajax) {
+		echo <<<EOF
+<div class="modal" style="width: 540px;">
 
-	$form = new Form($html->url(), 'post');
+EOF;
+	} else {
+		$page->add_breadcrumb_item('Save PHiddle As...');
+		$page->output_header("{$lang->developer_tools} &mdash; Save As...");
+	}
+
+	$form = new Form($html->url(array('action' => 'save')), 'post', 'modal_form');
 	$formContainer = new FormContainer('Save PHiddle As...');
 
-	$formContainer->output_row('Title', 'enter a title for your PHiddle here', $form->generate_text_box('title', ''));
+	$formContainer->output_row('Title', 'enter a title for your PHiddle here', $form->generate_text_box('title', '', array('id' => 'saveAsTitle')).$form->generate_hidden_field('id', $mybb->input['id']).$form->generate_hidden_field('php_code', $mybb->input['php_code']).$form->generate_hidden_field('new', 1));
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Save', array('name' => 'save_phiddle'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_save'));
+	$buttons[] = $form->generate_submit_button('Save', array('name' => 'save_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_save', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
-	$page->output_footer();
+	if ($ajax) {
+		echo "\n</div>\n";
+	} else {
+		$page->output_footer();
+	}
+
 	exit;
 }
 
-function developerToolsDeleteProject()
+function developerToolsDeleteProject($ajax=false)
 {
 	global $mybb, $lang, $db, $html, $page;
 
@@ -138,41 +228,116 @@ function developerToolsDeleteProject()
 
 	$selectHtml = developerToolsCreatePhiddleSelect('', true);
 	if (!$selectHtml) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('There are no saved Phiddles to delete.', 'error');
 		admin_redirect($html->url());
 	}
 
-	$page->extra_header .= <<<EOF
+	$css = <<<EOF
+
 <style>
 select.phiddleList {
 	margin: 10px;
 	font-size: 1.2em;
-	font-weight: bold;
 }
 </style>
-
 EOF;
 
-	$page->add_breadcrumb_item('Delete a PHiddle');
-	$page->output_header("{$lang->developer_tools} &mdash; Delete");
+	if ($ajax) {
+		echo <<<EOF
+<div class="modal" style="width: 540px;">{$css}
 
-	$form = new Form($html->url(), 'post');
+EOF;
+	} else {
+		$page->extra_header .= $css;
+		$page->add_breadcrumb_item('Delete a PHiddle');
+		$page->output_header("{$lang->developer_tools} &mdash; Delete");
+	}
+
+	$form = new Form($html->url(array('action' => 'doDelete')), 'post', 'modal_form');
 	$formContainer = new FormContainer('Delete a Phiddle');
 
-	$formContainer->output_row('Select a Phiddle to delete', 'select one or more projects from the list', $selectHtml, 'phiddle');
+	$formContainer->output_row('Select one or more Phiddles to delete', 'select one or more projects from the list', $selectHtml, 'phiddle');
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Delete', array('name' => 'delete_phiddle'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_delete'));
+	$buttons[] = $form->generate_submit_button('Delete', array('name' => 'delete_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_delete', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
-	$page->output_footer();
+	if ($ajax) {
+		echo "\n</div>\n";
+	} else {
+		$page->output_footer();
+	}
+
 	exit;
 }
 
-function developerToolsImportProject()
+function developerToolsDoDeleteProject($ajax=false)
+{
+	global $mybb, $html, $lang;
+
+	$errorCount = 0;
+	$successCount = 0;
+	$deletedIds = array();
+	$deletedCurrentProject = false;
+	foreach ((array) $mybb->input['phiddle'] as $id) {
+		$phiddle = new PhiddleProject($id);
+
+		if (!$phiddle->isValid()) {
+			$errorCount++;
+			continue;
+		}
+
+		$result = $phiddle->remove();
+
+		if (!$result) {
+			$errorCount++;
+			continue;
+		}
+
+		if ($id == $projectId) {
+			$deletedCurrentProject = true;
+		}
+
+		$deletedIds[] = $id;
+		$successCount++;
+	}
+
+	if ($deletedCurrentProject) {
+		developerToolsNewProject(true);
+	}
+
+	if ($ajax) {
+		$data = array(
+			'deleted' => $successCount,
+			'failed' => $errorCount,
+			'deletedIds' => $deletedIds,
+		);
+
+		// send our headers.
+		header('Content-type: application/json');
+		echo(json_encode($data));
+		exit;
+	}
+
+	if ($errorCount) {
+		flash_message($lang->sprintf('{1} PHiddle(s) could not be successfully deleted.', $errorCount), 'error');
+	}
+
+	if ($successCount) {
+		flash_message($lang->sprintf('{1} PHiddle(s) successfully deleted.', $successCount), 'success');
+	}
+
+	admin_redirect($html->url());
+}
+
+function developerToolsImportProject($ajax=false)
 {
 	global $mybb, $lang, $db, $html, $page, $phiddle, $myCache;
 
@@ -180,23 +345,102 @@ function developerToolsImportProject()
 		$lang->load('developer_tools');
 	}
 
-	$page->add_breadcrumb_item('Import PHiddle');
-	$page->output_header("{$lang->developer_tools} &mdash; Save As...");
+	if ($ajax) {
+		echo <<<EOF
+<div class="modal" style="width: 540px;">
 
-	$form = new Form($html->url(), 'post', '', true);
+EOF;
+	} else {
+		$page->add_breadcrumb_item('Import PHiddle');
+		$page->output_header("{$lang->developer_tools} &mdash; Import PHiddle");
+	}
+
+	$form = new Form($html->url(array('action' => 'doImport')), 'post', 'modal_form');
 	$formContainer = new FormContainer('Import PHiddle');
 
-	$formContainer->output_row('Select File', 'select a file to import', $form->generate_file_upload_box('file'));
+	$formContainer->output_row('Select File', 'select a file to import', $form->generate_file_upload_box('file', array('id' => 'fileData')));
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Import', array('name' => 'import_phiddle'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_import'));
+	$buttons[] = $form->generate_submit_button('Import', array('name' => 'import_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_import', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
-	$page->output_footer();
+	if ($ajax) {
+		echo "\n</div>\n";
+	} else {
+		$page->output_footer();
+	}
+
 	exit;
+}
+
+function developerToolsDoImportProject($ajax = false)
+{
+	global $mybb, $html;
+
+	$xml = developerToolsCheckUploadedFile('file', '', $ajax);
+
+	$phiddle = new PhiddleProject();
+	$result = $phiddle->import($xml);
+	if (!$result) {
+		if ($ajax) {
+			exit;
+		}
+
+		flash_message('PHiddle could not be imported successfully.', 'error');
+		admin_redirect($html->url());
+	}
+
+	$id = $phiddle->save($xml);
+	if (!$id) {
+		if ($ajax) {
+			exit;
+		}
+
+		flash_message('PHiddle could not be imported successfully.', 'error');
+		admin_redirect($html->url());
+	}
+	
+	if ($ajax) {
+		$data = array(
+			'success' => true,
+		);
+
+		// send our headers.
+		header('Content-type: application/json');
+		echo(json_encode($data));
+		exit;
+	}
+
+	flash_message('PHiddle successfully imported.', 'success');
+	admin_redirect($html->url());
+}
+
+function developerToolsPreviewProject($ajax=false)
+{
+	global $mybb, $config, $html, $myCache;
+
+	$userCode = $mybb->input['php_code'];
+	$codeArray[$mybb->user['uid']] = $userCode;
+	$myCache->update('php_code', $codeArray);
+
+	developerToolsWriteTemp($userCode);
+
+	if ($ajax) {
+		$data = array(
+			'url' => "{$mybb->settings['bburl']}/{$config['admin_dir']}/modules/developer_tools/sandbox/{$mybb->user['uid']}/index.php",
+		);
+
+		// send our headers.
+		header('Content-type: application/json');
+		echo(json_encode($data));
+		exit;
+	}
+
+	flash_message('PHP code successfully executed.', 'success');
+	admin_redirect($html->url(array('action' => 'execute')) . '#output');
 }
 
 function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
@@ -242,7 +486,7 @@ function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
  * @param  string the redirect URL on error
  * @return string the file contents
  */
-function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '')
+function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '', $ajax=false)
 {
 	global $lang, $html;
 
@@ -252,16 +496,28 @@ function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '')
 
 	if (!$_FILES[$name] ||
 		$_FILES[$name]['error'] == 4) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('no file', 'error');
 		admin_redirect($returnUrl);
 	}
 
 	if ($_FILES[$name]['error']) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message($lang->sprintf('Error: {1}', $_FILES['file']['error']), 'error');
 		admin_redirect($returnUrl);
 	}
 
 	if (!is_uploaded_file($_FILES[$name]['tmp_name'])) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('did not upload', 'error');
 		admin_redirect($returnUrl);
 	}
@@ -270,9 +526,14 @@ function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '')
 	@unlink($_FILES[$name]['tmp_name']);
 
 	if (strlen(trim($content)) == 0) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('file empty', 'error');
 		admin_redirect($returnUrl);
 	}
+
 	return $content;
 }
 

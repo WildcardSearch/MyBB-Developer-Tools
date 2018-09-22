@@ -190,14 +190,7 @@ function developerToolsPHiddle()
 		} elseif (isset($mybb->input['deleteButton'])) {
 			developerToolsDeleteProject();
 		} elseif (isset($mybb->input['previewButton'])) {
-			$userCode = $mybb->input['php_code'];
-			$codeArray[$mybb->user['uid']] = $userCode;
-			$myCache->update('php_code', $codeArray);
-
-			developerToolsWriteTemp($userCode);
-			
-			flash_message('PHP code successfully executed.', 'success');
-			admin_redirect($html->url(array('action' => 'execute')) . '#output');
+			developerToolsPreviewProject();
 		} elseif (isset($mybb->input['load_phiddle'])) {
 			$phiddle = new PhiddleProject($mybb->input['phiddle']);
 
@@ -364,7 +357,7 @@ EOF;
 
 	</div>
 	<div id="qt_body_main_output" name="output" class="quick_tab">
-		<iframe src="{$iframeSource}" class="outputFrame"> </iframe>
+		<iframe id="output_frame" src="{$iframeSource}" class="outputFrame"> </iframe>
 	</div>
 EOF;
 
@@ -410,6 +403,9 @@ function developerToolsXmlhttp()
 		break;
 	case 'doImport':
 		developerToolsDoImportProject(true);
+		break;
+	case 'preview':
+		developerToolsPreviewProject(true);
 		break;
 	}
 }

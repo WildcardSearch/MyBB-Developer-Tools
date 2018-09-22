@@ -28,8 +28,8 @@ var DevTools = (function($, dt) {
 	function init() {
 		var activeTab;
 
-		DevTools.QuickTab.newInstance('main', ['php','output']);
-		tabs = DevTools.QuickTab.getInstance('main');
+		DevTools.QuickTab.newInstance("main", ["php","output"]);
+		tabs = DevTools.QuickTab.getInstance("main");
 
 		tabs.getActive();
 		activeTab = tabs.active;
@@ -76,6 +76,7 @@ var DevTools = (function($, dt) {
 		$("#saveAsButton").click(saveAsOnClick);
 		$("#deleteButton").click(deleteOnClick);
 		$("#importButton").click(importOnClick);
+		$("#previewButton").click(previewOnClick);
 
 		tabs.show(activeTab);
 	}
@@ -302,6 +303,29 @@ var DevTools = (function($, dt) {
 		} else {
 			$.jGrowl("PHiddle could not be imported successfully.", {theme: "jgrowl_error"});
 		}
+	}
+
+	function previewOnClick(e) {
+		e.preventDefault();
+
+		$.ajax({
+			type: "post",
+			url: url,
+			data: {
+				action: "preview",
+				mode: "ajax",
+				php_code: Editor.getValue(),
+			},
+			success: previewOnSuccess,
+			error: xmlhttpError,
+		});
+	}
+
+	function previewOnSuccess(data) {
+		tabs.show("output");
+		$("#output_frame").prop("src", data.url);
+
+		$.jGrowl("PHiddle launched.", {theme: "jgrowl_success"});
 	}
 
 	function cancelOnClick(e) {

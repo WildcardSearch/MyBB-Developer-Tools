@@ -418,6 +418,31 @@ function developerToolsDoImportProject($ajax = false)
 	admin_redirect($html->url());
 }
 
+function developerToolsPreviewProject($ajax=false)
+{
+	global $mybb, $config, $html, $myCache;
+
+	$userCode = $mybb->input['php_code'];
+	$codeArray[$mybb->user['uid']] = $userCode;
+	$myCache->update('php_code', $codeArray);
+
+	developerToolsWriteTemp($userCode);
+
+	if ($ajax) {
+		$data = array(
+			'url' => "{$mybb->settings['bburl']}/{$config['admin_dir']}/modules/developer_tools/sandbox/{$mybb->user['uid']}/index.php",
+		);
+
+		// send our headers.
+		header('Content-type: application/json');
+		echo(json_encode($data));
+		exit;
+	}
+
+	flash_message('PHP code successfully executed.', 'success');
+	admin_redirect($html->url(array('action' => 'execute')) . '#output');
+}
+
 function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
 {
 	global $lang, $db;

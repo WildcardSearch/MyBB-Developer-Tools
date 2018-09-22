@@ -215,7 +215,7 @@ var DevTools = (function($, dt) {
 
 		$.ajax({
 			type: "post",
-			url: $("#modal_form").attr("action") + "&mode=ajax",
+			url: $("#modal_form").attr("action")+"&mode=ajax",
 			data: $("#modal_form").serialize(),
 			success: loadOnSuccess,
 			error: xmlhttpError,
@@ -320,7 +320,7 @@ var DevTools = (function($, dt) {
 
 		$.ajax({
 			type: "post",
-			url: $("#modal_form").attr("action") + "&mode=ajax",
+			url: $("#modal_form").attr("action")+"&mode=ajax",
 			data: $("#modal_form").serialize(),
 			success: saveAsOnSuccess,
 			error: xmlhttpError,
@@ -374,7 +374,7 @@ var DevTools = (function($, dt) {
 
 		$.ajax({
 			type: "post",
-			url: $("#modal_form").attr("action") + "&mode=ajax",
+			url: $("#modal_form").attr("action")+"&mode=ajax",
 			data: $("#modal_form").serialize(),
 			success: deleteOnSuccess,
 			error: xmlhttpError,
@@ -442,7 +442,7 @@ var DevTools = (function($, dt) {
 
 		$.ajax({
 			type: "post",
-			url: $("#modal_form").attr("action") + "&mode=ajax",
+			url: $("#modal_form").attr("action")+"&mode=ajax",
 			cache: false,
 			contentType: false,
 			processData: false,
@@ -560,7 +560,7 @@ var DevTools = (function($, dt) {
 	 */
 	function xmlhttpError(jqXHR, textStatus, errorThrown) {
 		console.log(jqXHR);
-		$.jGrowl(textStatus+": <br /><br />" + errorThrown, {theme: "jgrowl_error"});
+		$.jGrowl(textStatus+": <br /><br />"+errorThrown, {theme: "jgrowl_error"});
 	}
 
 	$(init);

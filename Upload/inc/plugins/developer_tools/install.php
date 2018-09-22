@@ -241,7 +241,7 @@ function developerToolsCheckRequirements($deep = false)
 {
 	global $lang;
 
-	$adminStatus = is_writable(MYBB_ADMIN_DIR . 'styles/');
+	$adminStatus = is_writable(MYBB_ADMIN_DIR.'styles/');
 	if ($deep !== true &&
 		$adminStatus) {
 		return;
@@ -249,11 +249,11 @@ function developerToolsCheckRequirements($deep = false)
 
 	$issues = '';
 	if (!$adminStatus) {
-		$issues .= '<br /><span style="font-family: Courier New; font-weight: bolder; font-size: small; color: black;">' . MYBB_ADMIN_DIR . 'styles/</span>';
+		$issues .= '<br /><span style="font-family: Courier New; font-weight: bolder; font-size: small; color: black;">'.MYBB_ADMIN_DIR.'styles/</span>';
 	}
 
 	if ($deep) {
-		$adminSubStatus = developerToolsIsWritable(MYBB_ADMIN_DIR . 'styles/');
+		$adminSubStatus = developerToolsIsWritable(MYBB_ADMIN_DIR.'styles/');
 
 		if ($adminStatus &&
 			$adminSubStatus) {
@@ -261,7 +261,7 @@ function developerToolsCheckRequirements($deep = false)
 		}
 
 		if (!$adminSubStatus) {
-			$issues .= "<br /><span>{$lang->sprintf($lang->developer_tools_subfolders_unwritable, MYBB_ADMIN_DIR . 'styles/</span>')}";
+			$issues .= "<br /><span>{$lang->sprintf($lang->developer_tools_subfolders_unwritable, MYBB_ADMIN_DIR.'styles/</span>')}";
 		}
 		return "{$lang->developer_tools_folders_requirement_warning}<br />{$issues}";
 	}
@@ -286,8 +286,8 @@ function developerToolsIsWritable($rootFolder)
 			continue;
 		}
 
-		if (!is_writeable($rootFolder . $folder . '/') ||
-			!developerToolsIsWritable($rootFolder . $folder . '/')) {
+		if (!is_writeable($rootFolder.$folder.'/') ||
+			!developerToolsIsWritable($rootFolder.$folder.'/')) {
 			return false;
 		}
 	}

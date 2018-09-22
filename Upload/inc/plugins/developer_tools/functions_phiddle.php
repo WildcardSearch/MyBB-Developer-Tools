@@ -522,7 +522,7 @@ function developerToolsPreviewProject($ajax=false)
 	}
 
 	flash_message($lang->developer_tools_success_preview, 'success');
-	admin_redirect($html->url(array('action' => 'execute')) . '#output');
+	admin_redirect($html->url(array('action' => 'execute')).'#output');
 }
 
 /**

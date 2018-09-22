@@ -5,7 +5,7 @@ if (!defined('IN_MYBB')) {
 	die('Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.');
 }
 
-require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions.php';
+require_once MYBB_ROOT.'inc/plugins/developer_tools/functions.php';
 define('DEVELOPER_TOOLS_URL', 'index.php?module=developer_tools');
 
 /**

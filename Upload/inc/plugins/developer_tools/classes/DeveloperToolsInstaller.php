@@ -32,7 +32,7 @@ class DeveloperToolsInstaller extends WildcardPluginInstaller020000
 	 */
 	public function __construct($path = '')
 	{
-		parent::__construct(MYBB_ROOT . 'inc/plugins/developer_tools/install_data.php');
+		parent::__construct(MYBB_ROOT.'inc/plugins/developer_tools/install_data.php');
 	}
 }
 

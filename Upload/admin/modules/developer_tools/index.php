@@ -22,7 +22,7 @@ if ($action) {
 }
 
 // URL, link and image markup generator
-$html = new HTMLGenerator010000(DEVELOPER_TOOLS_URL . $urlExtra);
+$html = new HTMLGenerator010000(DEVELOPER_TOOLS_URL.$urlExtra);
 
 $modules = developerToolsGetAllModules();
 $moduleActions = array_keys($modules);
@@ -124,7 +124,7 @@ function developerToolsPHiddle()
 
 	$myCache = DeveloperToolsCache::getInstance();
 
-	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
+	require_once MYBB_ROOT.'inc/plugins/developer_tools/functions_phiddle.php';
 
 	$title = $lang->developer_tools_phiddle_default_title;
 	$cookieKey = "phiddle_project{$mybb->user['uid']}";

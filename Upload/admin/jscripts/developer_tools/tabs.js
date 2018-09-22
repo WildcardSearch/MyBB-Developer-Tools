@@ -30,24 +30,24 @@ var DevTools = (function($, dt) {
 
 			if (!tabs ||
 				tabs.length == 0 ||
-				$("#quick_tab_" + name).length == 0) {
+				$("#quick_tab_"+name).length == 0) {
 				return;
 			}
 
 			this.name = name;
 			this.tabs = [];
-			this.$container = $("#quick_tab_" + name);
+			this.$container = $("#quick_tab_"+name);
 
 			for (t = 0; t < tabs.length; t++) {
-				lName = "qt_link_" + name + "_" + tabs[t];
-				bName = "qt_body_" + name + "_" + tabs[t];
-				if (!$("#" + lName) ||
-					!$("#" + bName)) {
+				lName = "qt_link_"+name+"_"+tabs[t];
+				bName = "qt_body_"+name+"_"+tabs[t];
+				if (!$("#"+lName) ||
+					!$("#"+bName)) {
 					return;
 				}
 				this.tabs[tabs[t]] = {
-					link: $("#" + lName),
-					body: $("#" + bName),
+					link: $("#"+lName),
+					body: $("#"+bName),
 				};
 				if (!this.active) {
 					this.active = tabs[t];

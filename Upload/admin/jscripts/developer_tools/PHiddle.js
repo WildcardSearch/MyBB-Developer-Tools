@@ -15,8 +15,16 @@ var DevTools = (function($, dt) {
 	},
 
 	lang = {
-		phiddle_deleted: 'Phiddle deleted.',
-		phiddles_deleted: 'Phiddles deleted.',
+		success_code_cleared: "Project code cleared.",
+		success_load_generic: "PHiddle successfully loaded.",
+		success_save_phiddle: "Phiddle saved successfully.",
+		error_delete_fail_generic: "{1} PHiddle(s) could not be successfully deleted.",
+		success_delete_phiddle_generic: "{1} PHiddle(s) successfully deleted.",
+		success_import_phiddle: "PHiddle successfully imported.",
+		error_import_fail: "PHiddle could not be imported successfully.",
+		success_preview: "PHP code successfully executed.",
+		default_title: "[New PHiddle]",
+		phiddle: "PHiddle",
 	};
 
 	function setup(o, l) {
@@ -123,7 +131,7 @@ var DevTools = (function($, dt) {
 	function newOnSuccess() {
 		clear();
 
-		$.jGrowl("PHiddle cleared.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_code_cleared, {theme: "jgrowl_success"});
 	}
 
 	function loadOnClick(e) {
@@ -160,7 +168,7 @@ var DevTools = (function($, dt) {
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
 		hasChanged = false;
-		$.jGrowl("PHiddle loaded.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_load_generic, {theme: "jgrowl_success"});
 	}
 
 	function saveOnClick(e) {
@@ -188,7 +196,7 @@ var DevTools = (function($, dt) {
 	function saveOnSuccess(data) {
 		hasChanged = false;
 		mirror = Editor.getValue();
-		$.jGrowl("PHiddle saved.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
 	}
 
 	function saveAsOnClick(e) {
@@ -231,7 +239,7 @@ var DevTools = (function($, dt) {
 		projectId = data.id;
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
-		$.jGrowl("PHiddle saved.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
 		hasChanged = false;
 		mirror = Editor.getValue();
 		$.modal.close();
@@ -264,9 +272,6 @@ var DevTools = (function($, dt) {
 	}
 
 	function deleteOnSuccess(data) {
-		var successLanguage = "PHiddle successfully deleted.",
-			errorLanguage = "PHiddle could not be deleted successfully.";
-
 		if (data.deleted > 0 &&
 			data.deletedIds.length &&
 			data.deletedIds.indexOf(projectId) != -1) {
@@ -276,20 +281,14 @@ var DevTools = (function($, dt) {
 		$.modal.close();
 
 		if (data.deleted > 0) {
-			if (data.deleted > 1) {
-				successLanguage = "PHiddles successfully deleted.";
-			}
-			$.jGrowl(data.deleted+" "+successLanguage, {theme: "jgrowl_success"});
+			$.jGrowl(lang.success_delete_phiddle_generic.replace("{1}", data.deleted), {theme: "jgrowl_success"});
 		}
 
 		if (!data.failed) {
 			return;
 		}
 
-		if (data.failed > 1) {
-			errorLanguage = "PHiddles could not be deleted successfully.";
-		}
-		$.jGrowl(data.failed+" "+errorLanguage, {theme: "jgrowl_error"});
+		$.jGrowl(lang.error_delete_fail_generic.replace("{1}", data.failed), {theme: "jgrowl_error"});
 	}
 
 	function importOnClick(e) {
@@ -308,7 +307,7 @@ var DevTools = (function($, dt) {
 
 	function importOnSubmit(e) {
 		var data = new FormData();
-		
+
 		e.preventDefault();
 
 		data.append('file', $("#fileData").prop("files")[0]);
@@ -329,9 +328,9 @@ var DevTools = (function($, dt) {
 		$.modal.close();
 
 		if (data.success) {
-			$.jGrowl("PHiddle imported.", {theme: "jgrowl_success"});
+			$.jGrowl(lang.success_import_phiddle, {theme: "jgrowl_success"});
 		} else {
-			$.jGrowl("PHiddle could not be imported successfully.", {theme: "jgrowl_error"});
+			$.jGrowl(lang.error_import_fail, {theme: "jgrowl_error"});
 		}
 	}
 
@@ -355,7 +354,7 @@ var DevTools = (function($, dt) {
 		tabs.show("output");
 		$("#output_frame").prop("src", data.url);
 
-		$.jGrowl("PHiddle launched.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_preview, {theme: "jgrowl_success"});
 	}
 
 	function cancelOnClick(e) {
@@ -381,12 +380,12 @@ var DevTools = (function($, dt) {
 	function setPageTitle(title) {
 		if (!title) {
 			projectTitle = '';
-			title = '[New PHiddle]';
+			title = lang.default_title;
 		} else {
 			projectTitle = title;
 		}
 
-		document.title = "PHiddle — "+title;
+		document.title = lang.phiddle+" — "+title;
 	}
 
 	function xmlhttpError(jqXHR, textStatus, errorThrown) {

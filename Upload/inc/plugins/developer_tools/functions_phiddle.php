@@ -9,7 +9,11 @@
 
 function developerToolsWriteTemp($userCode)
 {
-	global $mybb;
+	global $mybb, $lang;
+
+	if (!$lang->developer_tools) {
+		$lang->load('developer_tools');
+	}
 
 	$code = <<<EOF
 <?php
@@ -29,7 +33,7 @@ EOF;
 	$folder = MYBB_ADMIN_DIR."modules/developer_tools/sandbox/{$mybb->user['uid']}";
 	if (!file_exists($folder) &&
 		@!mkdir($folder, 0775)) {
-		flash_message('Unable to create sandbox folder.', 'error');
+		flash_message($lang->developer_tools_error_sandbox_folder, 'error');
 		admin_redirect($html->url());
 	}
 
@@ -65,7 +69,7 @@ function developerToolsLoadProject($ajax=false)
 			exit;
 		}
 
-		flash_message('There are no saved Phiddles to load.', 'error');
+		flash_message($lang->developer_tools_error_load_no_phiddles, 'error');
 		admin_redirect($html->url());
 	}
 
@@ -86,19 +90,19 @@ EOF;
 EOF;
 	} else {
 		$page->extra_header .= $css;
-		$page->add_breadcrumb_item('Load a PHiddle');
-		$page->output_header("{$lang->developer_tools} &mdash; Load");
+		$page->add_breadcrumb_item($lang->developer_tools_breadcrumb_load);
+		$page->output_header("{$lang->developer_tools} &mdash; {$lang->developer_tools_breadcrumb_load}");
 	}
 
 	$form = new Form($html->url(array('action' => 'doLoad')), 'post', 'modal_form');
-	$formContainer = new FormContainer('Open a Phiddle');
+	$formContainer = new FormContainer($lang->developer_tools_breadcrumb_load);
 
-	$formContainer->output_row('Select a Phiddle to load', 'select a project from the list', $selectHtml, 'phiddle');
+	$formContainer->output_row($lang->developer_tools_phiddle_select_title, $lang->developer_tools_phiddle_select_description, $selectHtml, 'phiddle');
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Load', array('name' => 'load_phiddle', 'id' => 'modalSubmit'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_load', 'id' => 'modalCancel'));
+	$buttons[] = $form->generate_submit_button($lang->developer_tools_load_button_title, array('name' => 'load_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button($lang->developer_tools_cancel_button_title, array('name' => 'cancel_load', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
@@ -139,7 +143,11 @@ function developerToolsDoLoadProject()
 
 function developerToolsSaveProject($ajax=false, $new=false)
 {
-	global $mybb, $db, $phiddle, $myCache, $html;
+	global $mybb, $lang, $db, $phiddle, $myCache, $html;
+
+	if (!$lang->developer_tools) {
+		$lang->load('developer_tools');
+	}
 
 	if ($ajax && !$new) {
 		$phiddle = new PhiddleProject($mybb->input['id']);
@@ -159,7 +167,7 @@ function developerToolsSaveProject($ajax=false, $new=false)
 	$myCache->update('php_code', $codeArray);
 
 	if (!$ajax) {
-		flash_message('Phiddle saved successfully', 'success');
+		flash_message($lang->developer_tools_success_save_phiddle, 'success');
 		admin_redirect($html->url());
 	}
 
@@ -193,19 +201,19 @@ function developerToolsSaveProjectAs($ajax=false)
 
 EOF;
 	} else {
-		$page->add_breadcrumb_item('Save PHiddle As...');
-		$page->output_header("{$lang->developer_tools} &mdash; Save As...");
+		$page->add_breadcrumb_item($lang->developer_tools_breadcrumb_save);
+		$page->output_header("{$lang->developer_tools} &mdash; {$lang->developer_tools_breadcrumb_save}");
 	}
 
 	$form = new Form($html->url(array('action' => 'save')), 'post', 'modal_form');
-	$formContainer = new FormContainer('Save PHiddle As...');
+	$formContainer = new FormContainer($lang->developer_tools_breadcrumb_save);
 
-	$formContainer->output_row('Title', 'enter a title for your PHiddle here', $form->generate_text_box('title', '', array('id' => 'saveAsTitle')).$form->generate_hidden_field('id', $mybb->input['id']).$form->generate_hidden_field('php_code', $mybb->input['php_code']).$form->generate_hidden_field('new', 1));
+	$formContainer->output_row($lang->developer_tools_phiddle_title_title, $lang->developer_tools_phiddle_title_description, $form->generate_text_box('title', '', array('id' => 'saveAsTitle')).$form->generate_hidden_field('id', $mybb->input['id']).$form->generate_hidden_field('php_code', $mybb->input['php_code']).$form->generate_hidden_field('new', 1));
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Save', array('name' => 'save_phiddle', 'id' => 'modalSubmit'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_save', 'id' => 'modalCancel'));
+	$buttons[] = $form->generate_submit_button($lang->developer_tools_save_button_title, array('name' => 'save_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button($lang->developer_tools_cancel_button_title, array('name' => 'cancel_save', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
@@ -232,7 +240,7 @@ function developerToolsDeleteProject($ajax=false)
 			exit;
 		}
 
-		flash_message('There are no saved Phiddles to delete.', 'error');
+		flash_message($lang->developer_tools_error_delete_fail_no_phiddles, 'error');
 		admin_redirect($html->url());
 	}
 
@@ -253,19 +261,19 @@ EOF;
 EOF;
 	} else {
 		$page->extra_header .= $css;
-		$page->add_breadcrumb_item('Delete a PHiddle');
-		$page->output_header("{$lang->developer_tools} &mdash; Delete");
+		$page->add_breadcrumb_item($lang->developer_tools_breadcrumb_delete);
+		$page->output_header("{$lang->developer_tools} &mdash; {$lang->developer_tools_breadcrumb_delete}");
 	}
 
 	$form = new Form($html->url(array('action' => 'doDelete')), 'post', 'modal_form');
-	$formContainer = new FormContainer('Delete a Phiddle');
+	$formContainer = new FormContainer($lang->developer_tools_breadcrumb_delete);
 
-	$formContainer->output_row('Select one or more Phiddles to delete', 'select one or more projects from the list', $selectHtml, 'phiddle');
+	$formContainer->output_row($lang->developer_tools_phiddle_delete_select_title, $lang->developer_tools_phiddle_delete_select_description, $selectHtml, 'phiddle');
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Delete', array('name' => 'delete_phiddle', 'id' => 'modalSubmit'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_delete', 'id' => 'modalCancel'));
+	$buttons[] = $form->generate_submit_button($lang->developer_tools_delete_button_title, array('name' => 'delete_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button($lang->developer_tools_cancel_button_title, array('name' => 'cancel_delete', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
@@ -327,11 +335,11 @@ function developerToolsDoDeleteProject($ajax=false)
 	}
 
 	if ($errorCount) {
-		flash_message($lang->sprintf('{1} PHiddle(s) could not be successfully deleted.', $errorCount), 'error');
+		flash_message($lang->sprintf($lang->developer_tools_error_delete_fail_generic, $errorCount), 'error');
 	}
 
 	if ($successCount) {
-		flash_message($lang->sprintf('{1} PHiddle(s) successfully deleted.', $successCount), 'success');
+		flash_message($lang->sprintf($lang->developer_tools_success_delete_phiddle_generic, $successCount), 'success');
 	}
 
 	admin_redirect($html->url());
@@ -351,19 +359,19 @@ function developerToolsImportProject($ajax=false)
 
 EOF;
 	} else {
-		$page->add_breadcrumb_item('Import PHiddle');
-		$page->output_header("{$lang->developer_tools} &mdash; Import PHiddle");
+		$page->add_breadcrumb_item($lang->developer_tools_breadcrumb_import);
+		$page->output_header("{$lang->developer_tools} &mdash; {$lang->developer_tools_breadcrumb_import}");
 	}
 
 	$form = new Form($html->url(array('action' => 'doImport')), 'post', 'modal_form');
-	$formContainer = new FormContainer('Import PHiddle');
+	$formContainer = new FormContainer($lang->developer_tools_breadcrumb_import);
 
-	$formContainer->output_row('Select File', 'select a file to import', $form->generate_file_upload_box('file', array('id' => 'fileData')));
+	$formContainer->output_row($lang->developer_tools_file_upload_title, $lang->developer_tools_file_upload_description, $form->generate_file_upload_box('file', array('id' => 'fileData')));
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Import', array('name' => 'import_phiddle', 'id' => 'modalSubmit'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_import', 'id' => 'modalCancel'));
+	$buttons[] = $form->generate_submit_button($lang->developer_tools_import_button_title, array('name' => 'import_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button($lang->developer_tools_cancel_button_title, array('name' => 'cancel_import', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
@@ -378,7 +386,11 @@ EOF;
 
 function developerToolsDoImportProject($ajax = false)
 {
-	global $mybb, $html;
+	global $mybb, $html, $lang;
+
+	if (!$lang->developer_tools) {
+		$lang->load('developer_tools');
+	}
 
 	$xml = developerToolsCheckUploadedFile('file', '', $ajax);
 
@@ -389,7 +401,7 @@ function developerToolsDoImportProject($ajax = false)
 			exit;
 		}
 
-		flash_message('PHiddle could not be imported successfully.', 'error');
+		flash_message($lang->developer_tools_error_import_fail, 'error');
 		admin_redirect($html->url());
 	}
 
@@ -399,10 +411,10 @@ function developerToolsDoImportProject($ajax = false)
 			exit;
 		}
 
-		flash_message('PHiddle could not be imported successfully.', 'error');
+		flash_message($lang->developer_tools_error_import_fail, 'error');
 		admin_redirect($html->url());
 	}
-	
+
 	if ($ajax) {
 		$data = array(
 			'success' => true,
@@ -414,13 +426,17 @@ function developerToolsDoImportProject($ajax = false)
 		exit;
 	}
 
-	flash_message('PHiddle successfully imported.', 'success');
+	flash_message($lang->developer_tools_success_import_phiddle, 'success');
 	admin_redirect($html->url());
 }
 
 function developerToolsPreviewProject($ajax=false)
 {
-	global $mybb, $config, $html, $myCache;
+	global $mybb, $config, $lang, $html, $myCache;
+
+	if (!$lang->developer_tools) {
+		$lang->load('developer_tools');
+	}
 
 	$userCode = $mybb->input['php_code'];
 	$codeArray[$mybb->user['uid']] = $userCode;
@@ -439,7 +455,7 @@ function developerToolsPreviewProject($ajax=false)
 		exit;
 	}
 
-	flash_message('PHP code successfully executed.', 'success');
+	flash_message($lang->developer_tools_success_preview, 'success');
 	admin_redirect($html->url(array('action' => 'execute')) . '#output');
 }
 
@@ -509,7 +525,7 @@ function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '', $ajax=
 			exit;
 		}
 
-		flash_message($lang->sprintf('Error: {1}', $_FILES['file']['error']), 'error');
+		flash_message($lang->sprintf($lang->developer_tools_error_file_upload_generic, $_FILES['file']['error']), 'error');
 		admin_redirect($returnUrl);
 	}
 
@@ -518,7 +534,7 @@ function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '', $ajax=
 			exit;
 		}
 
-		flash_message('did not upload', 'error');
+		flash_message($lang->developer_tools_error_file_upload_fail, 'error');
 		admin_redirect($returnUrl);
 	}
 
@@ -530,7 +546,7 @@ function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '', $ajax=
 			exit;
 		}
 
-		flash_message('file empty', 'error');
+		flash_message($lang->developer_tools_error_file_upload_file_empty, 'error');
 		admin_redirect($returnUrl);
 	}
 

@@ -1,7 +1,5 @@
 <?php
 
-define('DEV_TOOLS_DEFAULT_TITLE', '[New PHiddle]');
-
 // Disallow direct access to this file for security reasons
 if (!defined("IN_MYBB")) {
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
@@ -38,7 +36,7 @@ $page->add_breadcrumb_item($lang->developer_tools);
 
 $module = $modules[$action];
 if (!$module->isValid()) {
-	flash_message('Invalid module.', 'error');
+	flash_message($lang->developer_tools_error_module_invalid_module, 'error');
 	admin_redirect($html(array()));
 }
 
@@ -128,7 +126,7 @@ function developerToolsPHiddle()
 
 	require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions_phiddle.php';
 
-	$title = DEV_TOOLS_DEFAULT_TITLE;
+	$title = $lang->developer_tools_phiddle_default_title;
 	$cookieKey = "phiddle_project{$mybb->user['uid']}";
 	$phpCode = ' ';
 	$projectId = (int) $mybb->cookies[$cookieKey];
@@ -157,7 +155,7 @@ function developerToolsPHiddle()
 		if (isset($mybb->input['newButton'])) {
 			developerToolsNewProject();
 
-			flash_message('Project code cleared.', 'success');
+			flash_message($lang->developer_tools_success_code_cleared, 'success');
 			admin_redirect($html->url());
 		} elseif (isset($mybb->input['loadButton'])) {
 			developerToolsLoadProject();
@@ -177,13 +175,13 @@ function developerToolsPHiddle()
 			$id = $phiddle->save();
 
 			if (!$id) {
-				flash_message('Phiddle could not be saved successfully', 'error');
+				flash_message($lang->developer_tools_error_save_phiddle_generic, 'error');
 				admin_redirect($html->url());
 			}
 
 			my_setcookie($cookieKey, $id);
 
-			flash_message('Phiddle saved successfully', 'success');
+			flash_message($lang->developer_tools_success_save_phiddle, 'success');
 			admin_redirect($html->url());
 		} elseif (isset($mybb->input['saveAsButton'])) {
 			developerToolsSaveProjectAs();
@@ -195,15 +193,15 @@ function developerToolsPHiddle()
 			$phiddle = new PhiddleProject($mybb->input['phiddle']);
 
 			if (!$phiddle->isValid()) {
-				flash_message('PHiddle could not be loaded', 'success');
+				flash_message($lang->developer_tools_error_load_generic, 'success');
 				admin_redirect($html->url());
 			}
 
 			my_setcookie($cookieKey, $phiddle->get('id'));
 			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
 			$myCache->update('php_code', $codeArray);
-			
-			flash_message('PHiddle successfully loaded.', 'success');
+
+			flash_message($lang->developer_tools_success_load_generic, 'success');
 			admin_redirect($html->url());
 		} elseif (isset($mybb->input['delete_phiddle'])) {
 			developerToolsDoDeleteProject();
@@ -213,7 +211,7 @@ function developerToolsPHiddle()
 			developerToolsDoImportProject();
 		} elseif (isset($mybb->input['exportButton'])) {
 			if (!$projectId) {
-				flash_message('PHiddles must be saved before they can be exported.', 'error');
+				flash_message($lang->developer_tools_error_export_phiddle_not_saved, 'error');
 				admin_redirect($html->url());
 			}
 			$phiddle->export();
@@ -253,7 +251,18 @@ function developerToolsPHiddle()
 	DevTools.PHiddle.setup({
 		uid: "{$mybb->user['uid']}",
 		id: "{$projectId}",
-	}, {});
+	}, {
+		success_code_cleared: "{$lang->developer_tools_success_code_cleared}",
+		success_load_generic: "{$lang->developer_tools_success_load_generic}",
+		success_save_phiddle: "{$lang->developer_tools_success_save_phiddle}",
+		error_delete_fail_generic: "{$lang->developer_tools_error_delete_fail_generic}",
+		success_delete_phiddle_generic: "{$lang->developer_tools_success_delete_phiddle_generic}",
+		success_import_phiddle: "{$lang->developer_tools_success_import_phiddle}",
+		error_import_fail: "{$lang->developer_tools_error_import_fail}",
+		success_preview: "{$lang->developer_tools_success_preview}",
+		default_title: "{$lang->developer_tools_phiddle_default_title}",
+		phiddle: "{$lang->developer_tools_phiddle}",
+	});
 	// -->
 	</script>
 
@@ -322,12 +331,12 @@ EOF;
 	echo <<<EOF
 	<div id="quick_tab_main">
 		<li id="qt_link_main_php" name="php" class="quick_tab">
-			<a href="{$html->url()}#php">PHP</a>
-			<span style="display: none;">PHP</span>
+			<a href="{$html->url()}#php">{$lang->developer_tools_phiddle_tab_php}</a>
+			<span style="display: none;">{$lang->developer_tools_phiddle_tab_php}</span>
 		</li>
 		<li id="qt_link_main_output" name="output" class="quick_tab">
-			<a href="{$html->url()}#output">Output</a>
-			<span style="display: none;">Output</span>
+			<a href="{$html->url()}#output">{$lang->developer_tools_phiddle_tab_output}</a>
+			<span style="display: none;">{$lang->developer_tools_phiddle_tab_output}</span>
 		</li>
 EOF;
 
@@ -338,14 +347,14 @@ EOF;
 	<div id="qt_body_main_php" name="php" class="quick_tab">
 		<div id="toolBarContainer">
 			<span id="toolBar" class="toolBar">
-				<input type="submit" value=" " id="newButton" name="newButton" class="toolbarButton newButton" title="New"/>
-				<input type="submit" value=" " id="loadButton" name="loadButton" class="toolbarButton loadButton" title="Load..."/>
-				<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="Save" disabled />
-				<input type="submit" value=" " id="saveAsButton" name="saveAsButton" class="toolbarButton saveAsButton" title="Save As..."/>
-				<input type="submit" value=" " id="deleteButton" name="deleteButton" class="toolbarButton deleteButton" title="Delete..."/>
-				<input type="submit" value=" " id="importButton" name="importButton" class="toolbarButton importButton" title="Import..."/>
-				<input type="submit" value=" " id="exportButton" name="exportButton" class="toolbarButton exportButton" title="Export"/>
-				<input type="submit" value=" " id="previewButton" name="previewButton" class="toolbarButton previewButton" title="Preview"/>
+				<input type="submit" value=" " id="newButton" name="newButton" class="toolbarButton newButton" title="{$lang->developer_tools_toolbar_button_new_title}"/>
+				<input type="submit" value=" " id="loadButton" name="loadButton" class="toolbarButton loadButton" title="{$lang->developer_tools_toolbar_button_load_title}"/>
+				<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="{$lang->developer_tools_toolbar_button_save_title}" disabled />
+				<input type="submit" value=" " id="saveAsButton" name="saveAsButton" class="toolbarButton saveAsButton" title="{$lang->developer_tools_toolbar_button_save_as_title}"/>
+				<input type="submit" value=" " id="deleteButton" name="deleteButton" class="toolbarButton deleteButton" title="{$lang->developer_tools_toolbar_button_delete_title}"/>
+				<input type="submit" value=" " id="importButton" name="importButton" class="toolbarButton importButton" title="{$lang->developer_tools_toolbar_button_import_title}"/>
+				<input type="submit" value=" " id="exportButton" name="exportButton" class="toolbarButton exportButton" title="{$lang->developer_tools_toolbar_button_export_title}"/>
+				<input type="submit" value=" " id="previewButton" name="previewButton" class="toolbarButton previewButton" title="{$lang->developer_tools_toolbar_button_preview_title}"/>
 				<input type="hidden" id="hiddenId" name="id"/>
 			</span>
 		</div>
@@ -364,7 +373,7 @@ EOF;
 	$form->end();
 
 	echo '</div>';
-	$page->output_footer();	
+	$page->output_footer();
 }
 
 function developerToolsXmlhttp()

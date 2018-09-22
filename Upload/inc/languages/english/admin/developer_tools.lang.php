@@ -13,7 +13,7 @@ $l['developer_tools_description'] = 'tools to aid in development, theme design, 
 /* settings */
 
 $l['developer_tools_plugin_settings'] = 'Plugin Settings';
-$l['developer_tools_settingsgroup_description'] = 'placeholder';
+$l['developer_tools_settingsgroup_description'] = 'configure the plugin';
 
 $l['developer_tools_minify_js_title'] = 'Minify JavaScript?';
 $l['developer_tools_minify_js_desc'] = 'YES (default) to serve client-side scripts minified to increase performance, NO to serve beautiful, commented code ;)';
@@ -23,15 +23,87 @@ $l['developer_tools_admin_permissions_desc'] = 'Can use Developer Tools?';
 $l['developer_tools_page_permissions_desc'] = 'Can use "{1}" Module?';
 
 // plugin requirements
-$l['developer_tools_folders_requirement_warning'] = 'One or more folders are not writable. These folders need to be writable during installation and upgrades for themeable items to be upgraded on a per-theme basis.<br /><strong>Folder(s):</strong><br />';
+$l['developer_tools_folders_requirement_warning'] = 'One or more folders are not writable. These folders need to be writable during installation and upgrades for themeable items to be upgraded properly.<br /><strong>Folder(s):</strong><br />';
 $l['developer_tools_subfolders_unwritable'] = 'One or more subfolders in <span style="font-family: Courier New; font-weight: bolder; font-size: small; color: black;">{1}</span>';
 $l['developer_tools_cannot_be_installed'] = 'Developer Tools cannot be installed!';
 
 // PHiddle
-$l['developer_tools_admin_home'] = 'PHiddle';
+$l['developer_tools_phiddle'] = $l['developer_tools_admin_home'] = 'PHiddle';
+$l['developer_tools_phiddle_default_title'] = '[New PHiddle]';
 
 $l['developer_tools_phiddle_tab_php'] = 'PHP';
 $l['developer_tools_phiddle_tab_output'] = 'Output';
+$l['developer_tools_cancel_button_title'] = 'Cancel';
+
+$l['developer_tools_toolbar_button_new_title'] = 'New';
+$l['developer_tools_toolbar_button_load_title'] = 'Load...';
+$l['developer_tools_toolbar_button_save_title'] = 'Save';
+$l['developer_tools_toolbar_button_save_as_title'] = 'Save As...';
+$l['developer_tools_toolbar_button_delete_title'] = 'Delete...';
+$l['developer_tools_toolbar_button_import_title'] = 'Import...';
+$l['developer_tools_toolbar_button_export_title'] = 'Export';
+$l['developer_tools_toolbar_button_preview_title'] = 'Preview';
+
+	// load
+$l['developer_tools_breadcrumb_load'] = 'Load a PHiddle';
+
+$l['developer_tools_phiddle_select_title'] = 'Select a Phiddle to load';
+$l['developer_tools_phiddle_select_description'] = 'select a project from the list';
+
+$l['developer_tools_load_button_title'] = 'Load';
+
+$l['developer_tools_error_load_no_phiddles'] = 'There are no saved Phiddles to load.';
+
+$l['developer_tools_error_load_generic'] = 'PHiddle could not be loaded';
+$l['developer_tools_success_load_generic'] = 'PHiddle successfully loaded.';
+
+	//save
+$l['developer_tools_breadcrumb_save'] = 'Save PHiddle As...';
+$l['developer_tools_save_button_title'] = 'Save';
+
+$l['developer_tools_success_save_phiddle'] = 'Phiddle saved successfully.';
+
+$l['developer_tools_error_save_phiddle_generic'] = 'Phiddle could not be saved successfully';
+
+	// save as
+$l['developer_tools_phiddle_title_title'] = 'Title';
+$l['developer_tools_phiddle_title_description'] = 'enter a title for your PHiddle here';
+
+	// delete
+$l['developer_tools_breadcrumb_delete'] = 'Delete a PHiddle';
+
+$l['developer_tools_phiddle_delete_select_title'] = 'Select one or more Phiddles to delete';
+$l['developer_tools_phiddle_delete_select_description'] = 'select one or more projects from the list';
+
+$l['developer_tools_delete_button_title'] = 'Delete';
+
+$l['developer_tools_error_delete_fail_no_phiddles'] = 'There are no saved Phiddles to delete.';
+$l['developer_tools_error_delete_fail_generic'] = '{1} PHiddle(s) could not be successfully deleted.';
+$l['developer_tools_success_delete_phiddle_generic'] = '{1} PHiddle(s) successfully deleted.';
+
+	// import
+$l['developer_tools_breadcrumb_import'] = 'Import PHiddle';
+
+$l['developer_tools_file_upload_title'] = 'Select File';
+$l['developer_tools_file_upload_description'] = 'select a file to import';
+
+$l['developer_tools_import_button_title'] = 'Import';
+
+$l['developer_tools_error_import_fail'] = 'PHiddle could not be imported successfully.';
+$l['developer_tools_success_import_phiddle'] = 'PHiddle successfully imported.';
+
+$l['developer_tools_error_file_upload_generic'] = 'Error: {1}';
+$l['developer_tools_error_file_upload_fail'] = 'The file could be uploaded successfully.';
+$l['developer_tools_error_file_upload_file_empty'] = 'The uploaded file is empty or corrupted.';
+
+	// preview
+$l['developer_tools_success_preview'] = 'PHP code successfully executed.';
+
+	// messages
+$l['developer_tools_error_sandbox_folder'] = 'Unable to create sandbox folder.';
+$l['developer_tools_error_module_invalid_module'] = 'Invalid module.';
+$l['developer_tools_success_code_cleared'] = 'Project code cleared.';
+$l['developer_tools_error_export_phiddle_not_saved'] = 'PHiddles must be saved before they can be exported.';
 
 // modules
 $l['developer_tools_module_execute'] = 'Execute';

@@ -20,7 +20,7 @@ if (!defined('IN_MYBB')) {
  */
 function developer_tools_info()
 {
-	global $db, $lang, $mybb, $cp_style;
+	global $lang, $cp_style;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');

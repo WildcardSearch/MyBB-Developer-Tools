@@ -5,7 +5,7 @@ if (!defined("IN_MYBB")) {
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-global $page, $mybb, $lang, $html, $min, $modules;
+global $mybb, $page, $lang, $html, $modules, $min;
 
 if (!$lang->developer_tools) {
 	$lang->load('developer_tools');
@@ -120,7 +120,7 @@ exit;
  */
 function developerToolsPHiddle()
 {
-	global $config, $mybb, $db, $page, $html, $lang, $cp_style, $phiddle, $myCache;
+	global $mybb, $page, $config, $lang, $cp_style, $html, $myCache, $phiddle;
 
 	$myCache = DeveloperToolsCache::getInstance();
 

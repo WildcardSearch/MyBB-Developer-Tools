@@ -42,7 +42,7 @@ EOF;
 
 function developerToolsNewProject($keepCode=false)
 {
-	global $mybb, $html, $myCache;
+	global $mybb, $myCache;
 
 	my_unsetcookie("phiddle_project{$mybb->user['uid']}");
 
@@ -57,7 +57,7 @@ function developerToolsNewProject($keepCode=false)
 
 function developerToolsLoadProject($ajax=false)
 {
-	global $mybb, $lang, $db, $html, $page, $config;
+	global $page, $lang, $html;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -143,7 +143,7 @@ function developerToolsDoLoadProject()
 
 function developerToolsSaveProject($ajax=false, $new=false)
 {
-	global $mybb, $lang, $db, $phiddle, $myCache, $html;
+	global $mybb, $lang, $html, $myCache, $phiddle;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -185,7 +185,7 @@ function developerToolsSaveProject($ajax=false, $new=false)
 
 function developerToolsSaveProjectAs($ajax=false)
 {
-	global $mybb, $lang, $db, $html, $page, $phiddle, $myCache;
+	global $mybb, $page, $lang, $html, $myCache;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -228,7 +228,7 @@ EOF;
 
 function developerToolsDeleteProject($ajax=false)
 {
-	global $mybb, $lang, $db, $html, $page;
+	global $page, $lang, $html;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -288,7 +288,7 @@ EOF;
 
 function developerToolsDoDeleteProject($ajax=false)
 {
-	global $mybb, $html, $lang;
+	global $lang, $html;
 
 	$errorCount = 0;
 	$successCount = 0;
@@ -347,7 +347,7 @@ function developerToolsDoDeleteProject($ajax=false)
 
 function developerToolsImportProject($ajax=false)
 {
-	global $mybb, $lang, $db, $html, $page, $phiddle, $myCache;
+	global $page, $lang, $html;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -386,7 +386,7 @@ EOF;
 
 function developerToolsDoImportProject($ajax = false)
 {
-	global $mybb, $html, $lang;
+	global $lang, $html;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -461,7 +461,7 @@ function developerToolsPreviewProject($ajax=false)
 
 function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
 {
-	global $lang, $db;
+	global $db, $lang;
 
 	$form = new Form('', '', '', false, '', true);
 

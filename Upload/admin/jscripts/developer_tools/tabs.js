@@ -1,4 +1,26 @@
+/*
+ * Plugin Name: Developer Tools for MyBB 1.8.x
+ * Copyright 2014 WildcardSearch
+ * http://www.rantcentralforums.com
+ *
+ * this file contains scripts for the PHiddle
+ */
+
+/**
+ * provide tabs for the PHiddle page
+ *
+ * @param  Object jQuery
+ * @param  Object DevTools
+ * @return Object DevTools
+ */
 var DevTools = (function($, dt) {
+	/**
+	 * constructor
+	 *
+	 * @param  String
+	 * @param  Array
+	 * @return void
+	 */
 	dt.QuickTab = function(name, tabs) {
 		var t, lName, bName;
 
@@ -33,6 +55,11 @@ var DevTools = (function($, dt) {
 		this.observeLinks()
 	};
 
+	/**
+	 * add event handlers
+	 *
+	 * @return void
+	 */
 	function observeLinks() {
 		var property;
 		for (property in this.tabs) {
@@ -42,6 +69,12 @@ var DevTools = (function($, dt) {
 		}
 	}
 
+	/**
+	 * observe tab links
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function doClick(event) {
 		var target = event.target;
 		event.preventDefault();
@@ -52,6 +85,11 @@ var DevTools = (function($, dt) {
 		this.show($(target).parent()[0].getAttribute('name'));
 	}
 
+	/**
+	 * retrieve and store the active tab's key
+	 *
+	 * @return void
+	 */
 	function getActive() {
 		var pieces;
 
@@ -66,6 +104,12 @@ var DevTools = (function($, dt) {
 		this.active = pieces[pieces.length - 1];
 	}
 
+	/**
+	 * make named tab visible
+	 *
+	 * @param  String key
+	 * @return void
+	 */
 	function show(tab) {
 		if (this.active &&
 			this.tabs &&
@@ -89,6 +133,11 @@ var DevTools = (function($, dt) {
 		}
 	}
 
+	/**
+	 * shiw first available tab
+	 *
+	 * @return void
+	 */
 	function showFirstAvailable() {
 		var property;
 		for (property in this.tabs) {
@@ -101,6 +150,11 @@ var DevTools = (function($, dt) {
 		}
 	}
 
+	/**
+	 * hide all tab body elements
+	 *
+	 * @return void
+	 */
 	function hideAll() {
 		var property;
 		for (property in this.tabs) {
@@ -110,6 +164,12 @@ var DevTools = (function($, dt) {
 		}
 	}
 
+	/**
+	 * show named tab
+	 *
+	 * @param  String key
+	 * @return void
+	 */
 	function showTab(tab) {
 		if (!tab ||
 			!this.tabs[tab] ||
@@ -122,6 +182,12 @@ var DevTools = (function($, dt) {
 		this.tabs[tab].body.show();
 	}
 
+	/**
+	 * hide named tab
+	 *
+	 * @param  String key
+	 * @return void
+	 */
 	function hideTab(tab) {
 		if (!tab ||
 			!this.tabs[tab] ||
@@ -145,10 +211,23 @@ var DevTools = (function($, dt) {
 		showFirstAvailable: showFirstAvailable,
 	};
 
+	/**
+	 * create an instance
+	 *
+	 * @param  String
+	 * @param  Array
+	 * @return void
+	 */
 	function newInstance(name, tabs) {
 		dt.QuickTab.instances[name] = new dt.QuickTab(name, tabs);
 	}
 
+	/**
+	 * retrieve an instance by name
+	 *
+	 * @param  Object event
+	 * @return Object|Boolean DevTools.QuickTab or false on error
+	 */
 	function getInstance(name) {
 		if (!name ||
 			!dt.QuickTab.instances[name]) {

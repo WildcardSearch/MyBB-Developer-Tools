@@ -1,3 +1,18 @@
+/*
+ * Plugin Name: Developer Tools for MyBB 1.8.x
+ * Copyright 2014 WildcardSearch
+ * http://www.rantcentralforums.com
+ *
+ * this file contains scripts for the PHiddle
+ */
+
+/**
+ * provide AJAX overlay for the PHiddle
+ *
+ * @param  Object jQuery
+ * @param  Object DevTools
+ * @return Object DevTools
+ */
 var DevTools = (function($, dt) {
 	"use strict";
 
@@ -27,6 +42,13 @@ var DevTools = (function($, dt) {
 		phiddle: "PHiddle",
 	};
 
+	/**
+	 * extend options and language on load
+	 *
+	 * @param  Object options
+	 * @param  Object language
+	 * @return void
+	 */
 	function setup(o, l) {
 		$.extend(options, o || {});
 		$.extend(lang, l || {});
@@ -35,6 +57,11 @@ var DevTools = (function($, dt) {
 		cookieKey = "phiddle_project"+options.uid;
 	}
 
+	/**
+	 * initiate overlay on page load
+	 *
+	 * @return void
+	 */
 	function init() {
 		var activeTab;
 
@@ -96,12 +123,24 @@ var DevTools = (function($, dt) {
 		$(window).on("beforeunload", windowUnload);
 	}
 
+	/**
+	 * warn the user of data loss when navigating away with unsaved changes
+	 *
+	 * @param  Object event
+	 * @return |true true to alert the user
+	 */
 	function windowUnload(e) {
 		if (hasChanged) {
 			return true;
 		}
 	}
 
+	/**
+	 * monitor changes to the project
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function editorChanged(e) {
 		if (Editor.getValue() !== mirror) {
 			$("#saveButton").prop("disabled", false);
@@ -113,6 +152,12 @@ var DevTools = (function($, dt) {
 		hasChanged = false;
 	}
 
+	/**
+	 * send request on new button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function newOnClick(e) {
 		e.preventDefault();
 
@@ -128,12 +173,23 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * clear the project
+	 *
+	 * @return void
+	 */
 	function newOnSuccess() {
 		clear();
 
 		$.jGrowl(lang.success_code_cleared, {theme: "jgrowl_success"});
 	}
 
+	/**
+	 * send request on load button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function loadOnClick(e) {
 		e.preventDefault();
 
@@ -148,6 +204,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * send request on form submit button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function loadOnSubmit(e) {
 		e.preventDefault();
 
@@ -160,6 +222,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * load the project
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function loadOnSuccess(data) {
 		$.modal.close();
 		projectId = data.id;
@@ -171,6 +239,12 @@ var DevTools = (function($, dt) {
 		$.jGrowl(lang.success_load_generic, {theme: "jgrowl_success"});
 	}
 
+	/**
+	 * send request on save button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function saveOnClick(e) {
 		if (!projectId) {
 			saveAsOnClick(e);
@@ -193,12 +267,24 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * save the project
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function saveOnSuccess(data) {
 		hasChanged = false;
 		mirror = Editor.getValue();
 		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
 	}
 
+	/**
+	 * send request on save as button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function saveAsOnClick(e) {
 		e.preventDefault();
 
@@ -223,6 +309,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * send request on form submit button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function saveAsOnSubmit(e) {
 		e.preventDefault();
 
@@ -235,6 +327,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * save the project
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function saveAsOnSuccess(data) {
 		projectId = data.id;
 		setPageTitle(data.title);
@@ -245,6 +343,12 @@ var DevTools = (function($, dt) {
 		$.modal.close();
 	}
 
+	/**
+	 * send request on delete button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function deleteOnClick(e) {
 		e.preventDefault();
 
@@ -259,6 +363,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * send request on form submit button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function deleteOnSubmit(e) {
 		e.preventDefault();
 
@@ -271,6 +381,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * delete the project(s)
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function deleteOnSuccess(data) {
 		if (data.deleted > 0 &&
 			data.deletedIds.length &&
@@ -291,6 +407,12 @@ var DevTools = (function($, dt) {
 		$.jGrowl(lang.error_delete_fail_generic.replace("{1}", data.failed), {theme: "jgrowl_error"});
 	}
 
+	/**
+	 * send request on import button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function importOnClick(e) {
 		e.preventDefault();
 
@@ -305,6 +427,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * send request on form submit button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function importOnSubmit(e) {
 		var data = new FormData();
 
@@ -324,6 +452,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * import the project
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function importOnSuccess(data) {
 		$.modal.close();
 
@@ -334,6 +468,12 @@ var DevTools = (function($, dt) {
 		}
 	}
 
+	/**
+	 * send request on preview button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function previewOnClick(e) {
 		e.preventDefault();
 
@@ -350,6 +490,12 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * start the preview
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function previewOnSuccess(data) {
 		tabs.show("output");
 		$("#output_frame").prop("src", data.url);
@@ -357,12 +503,24 @@ var DevTools = (function($, dt) {
 		$.jGrowl(lang.success_preview, {theme: "jgrowl_success"});
 	}
 
+	/**
+	 * close the modal on cancel button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function cancelOnClick(e) {
 		e.preventDefault();
 
 		$.modal.close();
 	}
 
+	/**
+	 * clear the editor and reset project data
+	 *
+	 * @param  Boolean true to preserve the current editor data
+	 * @return void
+	 */
 	function clear(keepCode) {
 		if (!keepCode) {
 			Editor.setValue("");
@@ -377,6 +535,12 @@ var DevTools = (function($, dt) {
 		projectId = 0;
 	}
 
+	/**
+	 * retitle the page
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function setPageTitle(title) {
 		if (!title) {
 			projectTitle = '';
@@ -388,6 +552,12 @@ var DevTools = (function($, dt) {
 		document.title = lang.phiddle+" — "+title;
 	}
 
+	/**
+	 * generic error->jGrowl
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function xmlhttpError(jqXHR, textStatus, errorThrown) {
 		console.log(jqXHR);
 		$.jGrowl(textStatus+": <br /><br />" + errorThrown, {theme: "jgrowl_error"});

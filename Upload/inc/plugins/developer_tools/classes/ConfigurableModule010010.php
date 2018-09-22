@@ -1,10 +1,7 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
- * Copyright 2018 WildcardSearch
- * http://www.rantcentralforums.com
- *
- * module wrapper
+ * Wildcard Helper Classes
+ * ConfigurableModule Class Structure
  */
 
 abstract class ConfigurableModule010010 extends ExternalModule020000 implements ConfigurableModuleInterface010000

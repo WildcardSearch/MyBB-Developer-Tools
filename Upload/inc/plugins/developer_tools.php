@@ -29,6 +29,7 @@ if (defined('IN_ADMINCP')) {
  * class autoloader
  *
  * @param string the name of the class to load
+ * @return void
  */
 function developerToolsClassAutoLoad($className) {
 	$path = MYBB_ROOT . "inc/plugins/developer_tools/classes/{$className}.php";

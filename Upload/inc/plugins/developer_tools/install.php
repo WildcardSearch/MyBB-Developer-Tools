@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -190,7 +190,7 @@ function developerToolsGetSettingsgroup()
 /**
  * builds the URL to modify plugin settings if given valid info
  *
- * @param - $gid is an integer representing a valid settings group id
+ * @param  int group id
  * @return string setting group URL
  */
 function developerToolsBuildSettingsURL($gid)
@@ -234,6 +234,7 @@ EOF;
 /**
  * check plugin requirements and display warnings as appropriate
  *
+ * @param  bool
  * @return string warning text
  */
 function developerToolsCheckRequirements($deep = false)

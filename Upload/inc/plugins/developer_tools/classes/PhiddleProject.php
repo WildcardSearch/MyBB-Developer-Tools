@@ -1,7 +1,7 @@
 <?php
 /*
- * Plugin Name: Advanced Sidebox for MyBB 1.8.x
- * Copyright 2014 WildcardSearch
+ * Plugin Name: Developer Tools for MyBB 1.8.x
+ * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
  * this file contains an object wrapper for script definitons

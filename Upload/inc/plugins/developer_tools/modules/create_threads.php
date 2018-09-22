@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -124,6 +124,14 @@ function developer_tools_create_threads_execute($settings)
 	admin_redirect($html->url());
 }
 
+/**
+ * create a single thread per parameters
+ *
+ * @param  int
+ * @param  string
+ * @param  int
+ * @return int tid
+ */
 function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $dateline)
 {
 	global $mybb, $session, $li;
@@ -148,7 +156,6 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 
 	$posthandler->set_data($new_thread);
 	if ($posthandler->validate_thread() == false) {
-		//die(var_dump($new_thread));
 		return false;
 	}
 	$thread_info = $posthandler->insert_thread();
@@ -157,6 +164,16 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 	return $tid;
 }
 
+/**
+ * create a single post per parameters
+ *
+ * @param  int
+ * @param  int
+ * @param  string
+ * @param  string
+ * @param  int
+ * @return int pid
+ */
 function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $message, $dateline)
 {
 	global $mybb, $session;
@@ -190,6 +207,12 @@ function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $me
 	return $postinfo['pid'];
 }
 
+/**
+ * retrieve a random forum user
+ *
+ * @param  int|null
+ * @return int pid
+ */
 function developerToolsCreateThreadsGetRandomUser($totalUsers=null)
 {
 	global $db;

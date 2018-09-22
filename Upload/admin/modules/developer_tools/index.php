@@ -376,6 +376,11 @@ EOF;
 	$page->output_footer();
 }
 
+/**
+ * XMLHTTP router
+ *
+ * @return void
+ */
 function developerToolsXmlhttp()
 {
 	global $mybb;

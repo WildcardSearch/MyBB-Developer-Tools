@@ -1,7 +1,6 @@
 <?php
 /**
- * Wildcard Helper Classes - External PHP Module Wrapper
- * interface
+ * Wildcard Helper Classes - ConfigurableModule interface
  */
 
 interface ConfigurableModuleInterface010000

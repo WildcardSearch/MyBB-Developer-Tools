@@ -1,12 +1,18 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
  * this file contains functions used by the PHiddle
  */
 
+/**
+ * write temporary script
+ *
+ * @param  string
+ * @return void
+ */
 function developerToolsWriteTemp($userCode)
 {
 	global $mybb, $lang;
@@ -40,6 +46,12 @@ EOF;
 	file_put_contents($folder.'/index.php', $code);
 }
 
+/**
+ * clear project data
+ *
+ * @param  bool
+ * @return void
+ */
 function developerToolsNewProject($keepCode=false)
 {
 	global $mybb, $myCache;
@@ -55,6 +67,12 @@ function developerToolsNewProject($keepCode=false)
 	$myCache->update('php_code', $codeArray);
 }
 
+/**
+ * show load page/modal
+ *
+ * @param  bool
+ * @return void
+ */
 function developerToolsLoadProject($ajax=false)
 {
 	global $page, $lang, $html;
@@ -115,6 +133,11 @@ EOF;
 	exit;
 }
 
+/**
+ * load project data
+ *
+ * @return void
+ */
 function developerToolsDoLoadProject()
 {
 	global $mybb, $myCache;
@@ -141,6 +164,13 @@ function developerToolsDoLoadProject()
 	exit;
 }
 
+/**
+ * save the project
+ *
+ * @param  bool
+ * @param  bool
+ * @return void
+ */
 function developerToolsSaveProject($ajax=false, $new=false)
 {
 	global $mybb, $lang, $html, $myCache, $phiddle;
@@ -183,6 +213,12 @@ function developerToolsSaveProject($ajax=false, $new=false)
 	exit;
 }
 
+/**
+ * display save as page/modal
+ *
+ * @param  bool
+ * @return void
+ */
 function developerToolsSaveProjectAs($ajax=false)
 {
 	global $mybb, $page, $lang, $html, $myCache;
@@ -226,6 +262,12 @@ EOF;
 	exit;
 }
 
+/**
+ * display delete page/modal
+ *
+ * @param  bool
+ * @return void
+ */
 function developerToolsDeleteProject($ajax=false)
 {
 	global $page, $lang, $html;
@@ -286,6 +328,12 @@ EOF;
 	exit;
 }
 
+/**
+ * delete the project(s)
+ *
+ * @param  bool
+ * @return void
+ */
 function developerToolsDoDeleteProject($ajax=false)
 {
 	global $lang, $html;
@@ -345,6 +393,12 @@ function developerToolsDoDeleteProject($ajax=false)
 	admin_redirect($html->url());
 }
 
+/**
+ * display the import page/modal
+ *
+ * @param  bool
+ * @return void
+ */
 function developerToolsImportProject($ajax=false)
 {
 	global $page, $lang, $html;
@@ -384,6 +438,12 @@ EOF;
 	exit;
 }
 
+/**
+ * import the project
+ *
+ * @param  bool
+ * @return void
+ */
 function developerToolsDoImportProject($ajax = false)
 {
 	global $lang, $html;
@@ -430,6 +490,12 @@ function developerToolsDoImportProject($ajax = false)
 	admin_redirect($html->url());
 }
 
+/**
+ * preview the project
+ *
+ * @param  bool
+ * @return void
+ */
 function developerToolsPreviewProject($ajax=false)
 {
 	global $mybb, $config, $lang, $html, $myCache;
@@ -459,6 +525,13 @@ function developerToolsPreviewProject($ajax=false)
 	admin_redirect($html->url(array('action' => 'execute')) . '#output');
 }
 
+/**
+ * build the project select HTML
+ *
+ * @param  string
+ * @param  bool
+ * @return void
+ */
 function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
 {
 	global $db, $lang;

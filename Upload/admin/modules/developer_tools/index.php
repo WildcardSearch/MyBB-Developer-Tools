@@ -252,7 +252,7 @@ function developerToolsPHiddle()
 	<!--
 	DevTools.PHiddle.setup({
 		uid: "{$mybb->user['uid']}",
-		id: "{$id}",
+		id: "{$projectId}",
 	}, {});
 	// -->
 	</script>
@@ -340,7 +340,7 @@ EOF;
 			<span id="toolBar" class="toolBar">
 				<input type="submit" value=" " id="newButton" name="newButton" class="toolbarButton newButton" title="New"/>
 				<input type="submit" value=" " id="loadButton" name="loadButton" class="toolbarButton loadButton" title="Load..."/>
-				<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="Save"/>
+				<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="Save" disabled />
 				<input type="submit" value=" " id="saveAsButton" name="saveAsButton" class="toolbarButton saveAsButton" title="Save As..."/>
 				<input type="submit" value=" " id="deleteButton" name="deleteButton" class="toolbarButton deleteButton" title="Delete..."/>
 				<input type="submit" value=" " id="importButton" name="importButton" class="toolbarButton importButton" title="Import..."/>

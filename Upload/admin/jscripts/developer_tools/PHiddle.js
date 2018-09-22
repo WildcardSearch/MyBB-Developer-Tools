@@ -7,6 +7,8 @@ var DevTools = (function($, dt) {
 		projectId = 0,
 		projectTitle = "",
 		cookieKey = "",
+		hasChanged = false,
+		mirror = "",
 
 	options = {
 		uid: 0,
@@ -68,7 +70,10 @@ var DevTools = (function($, dt) {
 			Editor.setValue("");
 		}
 
+		mirror = Editor.getValue();
+
 		Editor.addPanel($("#toolBarContainer")[0]);
+		Editor.on("change", editorChanged);
 
 		$("#newButton").click(newOnClick);
 		$("#loadButton").click(loadOnClick);
@@ -79,6 +84,25 @@ var DevTools = (function($, dt) {
 		$("#previewButton").click(previewOnClick);
 
 		tabs.show(activeTab);
+
+		window.onbeforeunload = windowUnload;
+	}
+
+	function windowUnload(e) {
+		if (hasChanged) {
+			return true;
+		}
+	}
+
+	function editorChanged(e) {
+		if (Editor.getValue() !== mirror) {
+			$("#saveButton").prop("disabled", false);
+			hasChanged = true;
+			return;
+		}
+
+		$("#saveButton").prop("disabled", true);
+		hasChanged = false;
 	}
 
 	function newOnClick(e) {
@@ -132,8 +156,10 @@ var DevTools = (function($, dt) {
 		$.modal.close();
 		projectId = data.id;
 		Editor.setValue(data.code);
+		mirror = data.code;
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
+		hasChanged = false;
 		$.jGrowl("PHiddle loaded.", {theme: "jgrowl_success"});
 	}
 
@@ -160,6 +186,8 @@ var DevTools = (function($, dt) {
 	}
 
 	function saveOnSuccess(data) {
+		hasChanged = false;
+		mirror = Editor.getValue();
 		$.jGrowl("PHiddle saved.", {theme: "jgrowl_success"});
 	}
 
@@ -204,6 +232,8 @@ var DevTools = (function($, dt) {
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
 		$.jGrowl("PHiddle saved.", {theme: "jgrowl_success"});
+		hasChanged = false;
+		mirror = Editor.getValue();
 		$.modal.close();
 	}
 
@@ -337,6 +367,10 @@ var DevTools = (function($, dt) {
 	function clear(keepCode) {
 		if (!keepCode) {
 			Editor.setValue("");
+			mirror = "";
+			hasChanged = false;
+		} else {
+			hasChanged = true;
 		}
 
 		Cookie.unset(cookieKey);

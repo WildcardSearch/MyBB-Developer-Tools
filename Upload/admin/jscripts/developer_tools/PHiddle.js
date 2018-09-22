@@ -85,7 +85,7 @@ var DevTools = (function($, dt) {
 
 		tabs.show(activeTab);
 
-		window.onbeforeunload = windowUnload;
+		$(window).on("beforeunload", windowUnload);
 	}
 
 	function windowUnload(e) {

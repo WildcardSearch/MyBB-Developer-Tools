@@ -144,7 +144,7 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 	$posthandler->action = "thread";
 
 	// Set the thread data that came from the input to the $thread array.
-	$new_thread = array(
+	$newThread = array(
 		"fid" => $fid,
 		"subject" => $subject,
 		"uid" => $user['uid'],
@@ -154,12 +154,12 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 		"dateline" => $dateline,
 	);
 
-	$posthandler->set_data($new_thread);
+	$posthandler->set_data($newThread);
 	if ($posthandler->validate_thread() == false) {
 		return false;
 	}
-	$thread_info = $posthandler->insert_thread();
-	$tid = $thread_info['tid'];
+	$threadInfo = $posthandler->insert_thread();
+	$tid = $threadInfo['tid'];
 
 	return $tid;
 }

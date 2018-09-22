@@ -280,7 +280,7 @@ EOF;
 
 function developerToolsDoDeleteProject($ajax=false)
 {
-	global $mybb, $html;
+	global $mybb, $html, $lang;
 
 	$errorCount = 0;
 	$successCount = 0;
@@ -337,7 +337,7 @@ function developerToolsDoDeleteProject($ajax=false)
 	admin_redirect($html->url());
 }
 
-function developerToolsImportProject()
+function developerToolsImportProject($ajax=false)
 {
 	global $mybb, $lang, $db, $html, $page, $phiddle, $myCache;
 
@@ -345,23 +345,77 @@ function developerToolsImportProject()
 		$lang->load('developer_tools');
 	}
 
-	$page->add_breadcrumb_item('Import PHiddle');
-	$page->output_header("{$lang->developer_tools} &mdash; Save As...");
+	if ($ajax) {
+		echo <<<EOF
+<div class="modal" style="width: 540px;">
 
-	$form = new Form($html->url(), 'post', '', true);
+EOF;
+	} else {
+		$page->add_breadcrumb_item('Import PHiddle');
+		$page->output_header("{$lang->developer_tools} &mdash; Import PHiddle");
+	}
+
+	$form = new Form($html->url(array('action' => 'doImport')), 'post', 'modal_form');
 	$formContainer = new FormContainer('Import PHiddle');
 
-	$formContainer->output_row('Select File', 'select a file to import', $form->generate_file_upload_box('file'));
+	$formContainer->output_row('Select File', 'select a file to import', $form->generate_file_upload_box('file', array('id' => 'fileData')));
 
 	$formContainer->end();
 
-	$buttons[] = $form->generate_submit_button('Import', array('name' => 'import_phiddle'));
-	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_import'));
+	$buttons[] = $form->generate_submit_button('Import', array('name' => 'import_phiddle', 'id' => 'modalSubmit'));
+	$buttons[] = $form->generate_submit_button('Cancel', array('name' => 'cancel_import', 'id' => 'modalCancel'));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
 
-	$page->output_footer();
+	if ($ajax) {
+		echo "\n</div>\n";
+	} else {
+		$page->output_footer();
+	}
+
 	exit;
+}
+
+function developerToolsDoImportProject($ajax = false)
+{
+	global $mybb, $html;
+
+	$xml = developerToolsCheckUploadedFile('file', '', $ajax);
+
+	$phiddle = new PhiddleProject();
+	$result = $phiddle->import($xml);
+	if (!$result) {
+		if ($ajax) {
+			exit;
+		}
+
+		flash_message('PHiddle could not be imported successfully.', 'error');
+		admin_redirect($html->url());
+	}
+
+	$id = $phiddle->save($xml);
+	if (!$id) {
+		if ($ajax) {
+			exit;
+		}
+
+		flash_message('PHiddle could not be imported successfully.', 'error');
+		admin_redirect($html->url());
+	}
+	
+	if ($ajax) {
+		$data = array(
+			'success' => true,
+		);
+
+		// send our headers.
+		header('Content-type: application/json');
+		echo(json_encode($data));
+		exit;
+	}
+
+	flash_message('PHiddle successfully imported.', 'success');
+	admin_redirect($html->url());
 }
 
 function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
@@ -407,7 +461,7 @@ function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
  * @param  string the redirect URL on error
  * @return string the file contents
  */
-function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '')
+function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '', $ajax=false)
 {
 	global $lang, $html;
 
@@ -417,16 +471,28 @@ function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '')
 
 	if (!$_FILES[$name] ||
 		$_FILES[$name]['error'] == 4) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('no file', 'error');
 		admin_redirect($returnUrl);
 	}
 
 	if ($_FILES[$name]['error']) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message($lang->sprintf('Error: {1}', $_FILES['file']['error']), 'error');
 		admin_redirect($returnUrl);
 	}
 
 	if (!is_uploaded_file($_FILES[$name]['tmp_name'])) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('did not upload', 'error');
 		admin_redirect($returnUrl);
 	}
@@ -435,9 +501,14 @@ function developerToolsCheckUploadedFile($name = 'file', $returnUrl = '')
 	@unlink($_FILES[$name]['tmp_name']);
 
 	if (strlen(trim($content)) == 0) {
+		if ($ajax) {
+			exit;
+		}
+
 		flash_message('file empty', 'error');
 		admin_redirect($returnUrl);
 	}
+
 	return $content;
 }
 

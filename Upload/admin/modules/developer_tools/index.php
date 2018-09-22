@@ -217,28 +217,12 @@ function developerToolsPHiddle()
 		} elseif (isset($mybb->input['importButton'])) {
 			developerToolsImportProject();
 		} elseif (isset($mybb->input['import_phiddle'])) {
-			$xml = developerToolsCheckUploadedFile();
-
-			$phiddle = new PhiddleProject();
-			$result = $phiddle->import($xml);
-			if (!$result) {
-				flash_message('PHiddle could not be imported successfully.', 'error');
-				admin_redirect($html->url());
-			}
-
-			$id = $phiddle->save($xml);
-			if (!$id) {
-				flash_message('PHiddle could not be saved successfully.', 'error');
-				admin_redirect($html->url());
-			}
-			
-			my_setcookie($cookieKey, $id);
-			$codeArray[$mybb->user['uid']] = $phiddle->get('content');
-			$myCache->update('php_code', $codeArray);
-
-			flash_message('PHiddle successfully imported.', 'success');
-			admin_redirect($html->url());
+			developerToolsDoImportProject();
 		} elseif (isset($mybb->input['exportButton'])) {
+			if (!$projectId) {
+				flash_message('PHiddles must be saved before they can be exported.', 'error');
+				admin_redirect($html->url());
+			}
 			$phiddle->export();
 			exit;
 		}
@@ -420,6 +404,12 @@ function developerToolsXmlhttp()
 		break;
 	case 'doDelete':
 		developerToolsDoDeleteProject(true);
+		break;
+	case 'import':
+		developerToolsImportProject(true);
+		break;
+	case 'doImport':
+		developerToolsDoImportProject(true);
 		break;
 	}
 }

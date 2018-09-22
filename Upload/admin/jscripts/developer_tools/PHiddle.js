@@ -75,6 +75,7 @@ var DevTools = (function($, dt) {
 		$("#saveButton").click(saveOnClick);
 		$("#saveAsButton").click(saveAsOnClick);
 		$("#deleteButton").click(deleteOnClick);
+		$("#importButton").click(importOnClick);
 
 		tabs.show(activeTab);
 	}
@@ -258,6 +259,49 @@ var DevTools = (function($, dt) {
 			errorLanguage = "PHiddles could not be deleted successfully.";
 		}
 		$.jGrowl(data.failed+" "+errorLanguage, {theme: "jgrowl_error"});
+	}
+
+	function importOnClick(e) {
+		e.preventDefault();
+
+		$.get(url+"&mode=ajax&action=import", function(html) {
+			$(html).appendTo("body").modal({
+				fadeDuration: 250,
+				zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),
+			});
+
+			$("#modalSubmit").one("click", importOnSubmit);
+			$("#modalCancel").one("click", cancelOnClick);
+		});
+	}
+
+	function importOnSubmit(e) {
+		var data = new FormData();
+		
+		e.preventDefault();
+
+		data.append('file', $("#fileData").prop("files")[0]);
+
+		$.ajax({
+			type: "post",
+			url: $("#modal_form").attr("action") + "&mode=ajax",
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: data,
+			success: importOnSuccess,
+			error: xmlhttpError,
+		});
+	}
+
+	function importOnSuccess(data) {
+		$.modal.close();
+
+		if (data.success) {
+			$.jGrowl("PHiddle imported.", {theme: "jgrowl_success"});
+		} else {
+			$.jGrowl("PHiddle could not be imported successfully.", {theme: "jgrowl_error"});
+		}
 	}
 
 	function cancelOnClick(e) {

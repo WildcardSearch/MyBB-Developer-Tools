@@ -383,45 +383,17 @@ EOF;
  */
 function developerToolsXmlhttp()
 {
-	global $mybb;
+	global $mybb, $html;
 
-	$new = false;
-	if (isset($mybb->input['new'])) {
-		$new = true;
+	$new = isset($mybb->input['new']);
+	$ajax = ($mybb->input['action'] != 'new');
+
+	$functionName = 'developerTools'.ucfirst($mybb->input['action']).'Project';
+	if (!function_exists($functionName)) {
+		admin_redirect($html->url());
 	}
 
-	switch ($mybb->input['action']) {
-	case 'new':
-		developerToolsNewProject();
-		break;
-	case 'load':
-		developerToolsLoadProject(true);
-		break;
-	case 'doLoad':
-		developerToolsDoLoadProject();
-		break;
-	case 'save':
-		developerToolsSaveProject(true, $new);
-		break;
-	case 'saveAs':
-		developerToolsSaveProjectAs(true);
-		break;
-	case 'delete':
-		developerToolsDeleteProject(true);
-		break;
-	case 'doDelete':
-		developerToolsDoDeleteProject(true);
-		break;
-	case 'import':
-		developerToolsImportProject(true);
-		break;
-	case 'doImport':
-		developerToolsDoImportProject(true);
-		break;
-	case 'preview':
-		developerToolsPreviewProject(true);
-		break;
-	}
+	$functionName($ajax, $new);
 }
 
 ?>

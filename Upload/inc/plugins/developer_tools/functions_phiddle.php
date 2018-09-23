@@ -336,7 +336,7 @@ EOF;
  */
 function developerToolsDoDeleteProject($ajax=false)
 {
-	global $lang, $html;
+	global $mybb, $lang, $html;
 
 	$errorCount = 0;
 	$successCount = 0;

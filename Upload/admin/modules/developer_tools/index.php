@@ -324,6 +324,20 @@ input.previewButton {
 	float: right;
 	margin-right: 6px;
 }
+
+/* title */
+#phiddle_title {
+	width: 100%;
+	background: #f2f2f2;
+	border-radius: 6px;
+	box-shadow: 2px 2px 3px 0px gray;
+	padding: 1px 0px 1px 0px;
+}
+
+#phiddle_title h1 {
+	width: 100%;
+	text-align: center;
+}
 </style>
 EOF;
 
@@ -331,6 +345,10 @@ EOF;
 	$page->output_header("{$lang->developer_tools_admin_home} &mdash; {$title}");
 
 	echo <<<EOF
+	<div id="phiddle_title">
+		<h1>{$title}</h1>
+	</div>
+	<br />
 	<div id="quick_tab_main">
 		<li id="qt_link_main_php" name="php" class="quick_tab">
 			<a href="{$html->url()}#php">{$lang->developer_tools_phiddle_tab_php}</a>

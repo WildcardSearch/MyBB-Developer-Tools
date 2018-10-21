@@ -562,6 +562,7 @@ var DevTools = (function($, dt) {
 		}
 
 		document.title = lang.phiddle+" — "+title;
+		$("#phiddle_title h1").html(title);
 	}
 
 	/**

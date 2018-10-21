@@ -152,6 +152,9 @@ $l['developer_tools_create_threads_postcount_desc'] = 'enter the number of posts
 $l['developer_tools_create_threads_fid_title'] = 'Forum';
 $l['developer_tools_create_threads_fid_desc'] = 'select the forum in which to create the new thread (<strong>selecting a category will cause the module to fail</strong>)';
 
+$l['developer_tools_create_threads_image_folder_title'] = 'Post Images?';
+$l['developer_tools_create_threads_image_folder_desc'] = 'include a folder, relative to the forum root and images will be randomly posted from with that folder';
+
 $l['developer_tools_create_threads_success_message'] = 'Created {1} thread(s) and {2} post(s)';
 
 $l['developer_tools_create_threads_error_message_no_forum'] = 'Forum doesn\'t exist!';

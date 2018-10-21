@@ -54,6 +54,12 @@ EOF
 				'optionscode' => 'forumselectsingle',
 				'value' => '2',
 			),
+			'image_folder' => array(
+				'title' => $lang->developer_tools_create_threads_image_folder_title,
+				'description' => $lang->developer_tools_create_threads_image_folder_desc,
+				'optionscode' => 'text',
+				'value' => 'images/1061',
+			),
 		),
 	);
 }
@@ -93,7 +99,7 @@ function developer_tools_create_threads_execute($settings)
 	$td = TIME_NOW - $totalUsers;
 	for ($t = 1; $t <= $threadCount; $t++) {
 		$subject = ucwords($li->words(rand(1, 3)));
-		$tid = developer_tools_create_threads_my_create_thread($fid, $subject, $td++);
+		$tid = developer_tools_create_threads_my_create_thread($fid, $subject, $td++, $settings);
 
 		if ($tid == false) {
 			$t--;
@@ -107,7 +113,7 @@ function developer_tools_create_threads_execute($settings)
 			if (!$postMessage) {
 				$postMessage = 'Generic Message #'.$p;
 			}
-			$pid = developer_tools_create_threads_my_create_post($tid, $fid, $subject, $postMessage, $d++);
+			$pid = developer_tools_create_threads_my_create_post($tid, $fid, $subject, $postMessage, $d++, $settings);
 			if ($pid == false) {
 				$p--;
 				continue;
@@ -132,7 +138,7 @@ function developer_tools_create_threads_execute($settings)
  * @param  int
  * @return int tid
  */
-function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $dateline)
+function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $dateline, $settings)
 {
 	global $mybb, $session, $li;
 
@@ -149,7 +155,7 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 		"subject" => $subject,
 		"uid" => $user['uid'],
 		"username" => $user['username'],
-		"message" => $li->paragraphs(rand(1, 10)),
+		"message" => developerToolsGetMessage($settings),
 		"ipaddress" => $session->packedip,
 		"dateline" => $dateline,
 	);
@@ -165,6 +171,82 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 }
 
 /**
+ * get a random lorem ispsum message and image if applicable
+ *
+ * @param  array module settings
+ * @return string message
+ */
+function developerToolsGetMessage($settings)
+{
+	global $mybb, $li;
+
+	// clean up the image folder
+	$imageFolder = trim($settings['image_folder']);
+
+	if (substr($imageFolder, strlen($imageFolder) - 1) == '/') {
+		$imageFolder = substr($imageFolder, 0, strlen($imageFolder) - 1);
+	}
+
+	if (substr($imageFolder, 0, 1) == '/') {
+		$imageFolder = substr($imageFolder, 1);
+	}
+
+	// add a random image if available
+	$message = '';
+	if ($imageFolder &&
+		file_exists(MYBB_ROOT.$imageFolder)) {
+		$imageFile = developerToolsGetImage(MYBB_ROOT.$imageFolder);
+		if ($imageFile) {
+			$image = $mybb->settings['bburl']."/{$imageFolder}/".$imageFile;
+		}
+
+		if ($image) {
+			$message = "[img]{$image}[/img]\n\n";
+		}
+	}
+
+	// add some random paragraphs
+	$message .= $li->paragraphs(rand(1, 10));
+
+	return $message;
+}
+
+/**
+ * get a random lorem ispsum message and image if applicable
+ *
+ * @param  string relative folder path
+ * @return string file path
+ */
+function developerToolsGetImage($imageFolder)
+{
+	static $imageList = null;
+
+	// only build the image cache once
+	if (!isset($imageList)) {
+		$imageList = array();
+		foreach (new DirectoryIterator($imageFolder) as $file) {
+			if (!$file->isFile() ||
+				$file->isDot() ||
+				$file->isDir()) {
+				continue;
+			}
+
+			$extension = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
+
+			// only PHP files
+			if (!in_array($extension, array('gif', 'png', 'jpg', 'jpeg', 'bmp'))) {
+				continue;
+			}
+
+			// attempt to load the module
+			$imageList[] = $file->getFilename();
+		}
+	}
+
+	return $imageList[rand(0, count($imageList)-1)];
+}
+
+/**
  * create a single post per parameters
  *
  * @param  int
@@ -174,7 +256,7 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
  * @param  int
  * @return int pid
  */
-function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $message, $dateline)
+function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $message, $dateline, $settings)
 {
 	global $mybb, $session;
 
@@ -191,7 +273,7 @@ function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $me
 		"subject" => $subject,
 		"uid" => $user['uid'],
 		"username" => $user['username'],
-		"message" => $message,
+		"message" => developerToolsGetMessage($settings),
 		"ipaddress" => $session->packedip,
 		"dateline" => $dateline,
 	);

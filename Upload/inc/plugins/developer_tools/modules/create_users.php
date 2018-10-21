@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -98,7 +98,7 @@ function developer_tools_create_users_execute($settings)
 	}
 
 	// Set up user handler.
-	require_once MYBB_ROOT . 'inc/datahandlers/user.php';
+	require_once MYBB_ROOT.'inc/datahandlers/user.php';
 
 	$mybb->settings['allowmultipleemails'] = 1;
 
@@ -107,7 +107,7 @@ function developer_tools_create_users_execute($settings)
 		$nameSource = 'local';
 	}
 
-	require_once MYBB_ROOT . "inc/plugins/developer_tools/data/names/{$nameSource}/names.php";
+	require_once MYBB_ROOT."inc/plugins/developer_tools/data/names/{$nameSource}/names.php";
 
 	if (!$password ||
 		my_strlen($password) == 0) {

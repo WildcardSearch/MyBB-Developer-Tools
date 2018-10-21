@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -44,9 +44,9 @@ function developer_tools_create_username_avatars_execute($settings)
 {
 	global $mybb, $db, $html, $li, $lang;
 
-	require_once MYBB_ROOT . 'inc/functions_upload.php';
+	require_once MYBB_ROOT.'inc/functions_upload.php';
 
-	$font = MYBB_ROOT . 'inc/plugins/developer_tools/data/fonts/arialbd.ttf';
+	$font = MYBB_ROOT.'inc/plugins/developer_tools/data/fonts/arialbd.ttf';
 	$count = 0;
 	$users = array();
 	$query = $db->simple_select('users', '*', 'NOT uid=1', array('orderby' => 'uid', 'orderdir' => 'ASC'));
@@ -83,18 +83,19 @@ function developer_tools_create_username_avatars_execute($settings)
 			$y = $y + 20;
 		}
 
-		$path = MYBB_ROOT . 'uploads/avatars';
+		$path = MYBB_ROOT.'uploads/avatars';
 		if (!file_exists($path) &&
 			!@mkdir($path)) {
 			flash_message($lang->developer_tools_create_username_avatars_error_message_folder, 'error');
 			admin_redirect($html->url());
 		}
 		$filename = "{$path}/avatar_{$uid}.png";
+
 		imagepng($im, $filename);
 		imagedestroy($im);
 
 		$updatedAvatar = array(
-			'avatar' => $db->escape_string('./' . $filename . '?dateline=' . TIME_NOW),
+			'avatar' => $db->escape_string("./uploads/avatars/avatar_{$uid}.png?dateline=".TIME_NOW),
 			'avatardimensions' => '100|100',
 			'avatartype' => 'remote',
 		);

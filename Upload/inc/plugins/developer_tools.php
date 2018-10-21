@@ -12,7 +12,7 @@ if (!defined('IN_MYBB')) {
     die('Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.');
 }
 
-define('DEVELOPER_TOOLS_VERSION', '0.0.4');
+define('DEVELOPER_TOOLS_VERSION', '0.1');
 define('DEVELOPER_TOOLS_MOD_URL', MYBB_ROOT . 'inc/plugins/developer_tools/modules');
 
 // register custom class autoloader
@@ -29,6 +29,7 @@ if (defined('IN_ADMINCP')) {
  * class autoloader
  *
  * @param string the name of the class to load
+ * @return void
  */
 function developerToolsClassAutoLoad($className) {
 	$path = MYBB_ROOT . "inc/plugins/developer_tools/classes/{$className}.php";

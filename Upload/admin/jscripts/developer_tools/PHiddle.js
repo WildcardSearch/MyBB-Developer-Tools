@@ -1,3 +1,18 @@
+/*
+ * Plugin Name: Developer Tools for MyBB 1.8.x
+ * Copyright 2014 WildcardSearch
+ * http://www.rantcentralforums.com
+ *
+ * this file contains scripts for the PHiddle
+ */
+
+/**
+ * provide AJAX overlay for the PHiddle
+ *
+ * @param  Object jQuery
+ * @param  Object DevTools
+ * @return Object DevTools
+ */
 var DevTools = (function($, dt) {
 	"use strict";
 
@@ -15,10 +30,27 @@ var DevTools = (function($, dt) {
 	},
 
 	lang = {
-		phiddle_deleted: 'Phiddle deleted.',
-		phiddles_deleted: 'Phiddles deleted.',
+		success_code_cleared: "Project code cleared.",
+		success_load_generic: "PHiddle successfully loaded.",
+		error_no_phiddles: "There are no saved Phiddles to load.",
+		success_save_phiddle: "Phiddle saved successfully.",
+		error_delete_fail_generic: "{1} PHiddle(s) could not be successfully deleted.",
+		error_delete_no_phiddles: "There are no saved Phiddles to delete.",
+		success_delete_phiddle_generic: "{1} PHiddle(s) successfully deleted.",
+		success_import_phiddle: "PHiddle successfully imported.",
+		error_import_fail: "PHiddle could not be imported successfully.",
+		success_preview: "PHP code successfully executed.",
+		default_title: "[New PHiddle]",
+		phiddle: "PHiddle",
 	};
 
+	/**
+	 * extend options and language on load
+	 *
+	 * @param  Object options
+	 * @param  Object language
+	 * @return void
+	 */
 	function setup(o, l) {
 		$.extend(options, o || {});
 		$.extend(lang, l || {});
@@ -27,6 +59,11 @@ var DevTools = (function($, dt) {
 		cookieKey = "phiddle_project"+options.uid;
 	}
 
+	/**
+	 * initiate overlay on page load
+	 *
+	 * @return void
+	 */
 	function init() {
 		var activeTab;
 
@@ -72,7 +109,6 @@ var DevTools = (function($, dt) {
 
 		mirror = Editor.getValue();
 
-		Editor.addPanel($("#toolBarContainer")[0]);
 		Editor.on("change", editorChanged);
 
 		$("#newButton").click(newOnClick);
@@ -88,12 +124,24 @@ var DevTools = (function($, dt) {
 		$(window).on("beforeunload", windowUnload);
 	}
 
+	/**
+	 * warn the user of data loss when navigating away with unsaved changes
+	 *
+	 * @param  Object event
+	 * @return |true true to alert the user
+	 */
 	function windowUnload(e) {
 		if (hasChanged) {
 			return true;
 		}
 	}
 
+	/**
+	 * monitor changes to the project
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function editorChanged(e) {
 		if (Editor.getValue() !== mirror) {
 			$("#saveButton").prop("disabled", false);
@@ -105,6 +153,12 @@ var DevTools = (function($, dt) {
 		hasChanged = false;
 	}
 
+	/**
+	 * send request on new button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function newOnClick(e) {
 		e.preventDefault();
 
@@ -120,16 +174,32 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * clear the project
+	 *
+	 * @return void
+	 */
 	function newOnSuccess() {
 		clear();
 
-		$.jGrowl("PHiddle cleared.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_code_cleared, {theme: "jgrowl_success"});
 	}
 
+	/**
+	 * send request on load button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function loadOnClick(e) {
 		e.preventDefault();
 
 		$.get(url+"&mode=ajax&action=load", function(html) {
+			if (!html) {
+				$.jGrowl(lang.error_no_phiddles, { theme: 'jgrowl_error' });
+				return;
+			}
+
 			$(html).appendTo("body").modal({
 				fadeDuration: 250,
 				zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),
@@ -140,18 +210,30 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * send request on form submit button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function loadOnSubmit(e) {
 		e.preventDefault();
 
 		$.ajax({
 			type: "post",
-			url: $("#modal_form").attr("action") + "&mode=ajax",
+			url: $("#modal_form").attr("action")+"&mode=ajax",
 			data: $("#modal_form").serialize(),
 			success: loadOnSuccess,
 			error: xmlhttpError,
 		});
 	}
 
+	/**
+	 * load the project
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function loadOnSuccess(data) {
 		$.modal.close();
 		projectId = data.id;
@@ -160,9 +242,15 @@ var DevTools = (function($, dt) {
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
 		hasChanged = false;
-		$.jGrowl("PHiddle loaded.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_load_generic, {theme: "jgrowl_success"});
 	}
 
+	/**
+	 * send request on save button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function saveOnClick(e) {
 		if (!projectId) {
 			saveAsOnClick(e);
@@ -185,12 +273,24 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * save the project
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function saveOnSuccess(data) {
 		hasChanged = false;
 		mirror = Editor.getValue();
-		$.jGrowl("PHiddle saved.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
 	}
 
+	/**
+	 * send request on save as button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function saveAsOnClick(e) {
 		e.preventDefault();
 
@@ -215,32 +315,55 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * send request on form submit button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function saveAsOnSubmit(e) {
 		e.preventDefault();
 
 		$.ajax({
 			type: "post",
-			url: $("#modal_form").attr("action") + "&mode=ajax",
+			url: $("#modal_form").attr("action")+"&mode=ajax",
 			data: $("#modal_form").serialize(),
 			success: saveAsOnSuccess,
 			error: xmlhttpError,
 		});
 	}
 
+	/**
+	 * save the project
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function saveAsOnSuccess(data) {
 		projectId = data.id;
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
-		$.jGrowl("PHiddle saved.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
 		hasChanged = false;
 		mirror = Editor.getValue();
 		$.modal.close();
 	}
 
+	/**
+	 * send request on delete button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function deleteOnClick(e) {
 		e.preventDefault();
 
 		$.get(url+"&mode=ajax&action=delete", function(html) {
+			if (!html) {
+				$.jGrowl(lang.error_delete_no_phiddles, { theme: 'jgrowl_error' });
+				return;
+			}
+
 			$(html).appendTo("body").modal({
 				fadeDuration: 250,
 				zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),
@@ -251,22 +374,31 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * send request on form submit button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function deleteOnSubmit(e) {
 		e.preventDefault();
 
 		$.ajax({
 			type: "post",
-			url: $("#modal_form").attr("action") + "&mode=ajax",
+			url: $("#modal_form").attr("action")+"&mode=ajax",
 			data: $("#modal_form").serialize(),
 			success: deleteOnSuccess,
 			error: xmlhttpError,
 		});
 	}
 
+	/**
+	 * delete the project(s)
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function deleteOnSuccess(data) {
-		var successLanguage = "PHiddle successfully deleted.",
-			errorLanguage = "PHiddle could not be deleted successfully.";
-
 		if (data.deleted > 0 &&
 			data.deletedIds.length &&
 			data.deletedIds.indexOf(projectId) != -1) {
@@ -276,22 +408,22 @@ var DevTools = (function($, dt) {
 		$.modal.close();
 
 		if (data.deleted > 0) {
-			if (data.deleted > 1) {
-				successLanguage = "PHiddles successfully deleted.";
-			}
-			$.jGrowl(data.deleted+" "+successLanguage, {theme: "jgrowl_success"});
+			$.jGrowl(lang.success_delete_phiddle_generic.replace("{1}", data.deleted), {theme: "jgrowl_success"});
 		}
 
 		if (!data.failed) {
 			return;
 		}
 
-		if (data.failed > 1) {
-			errorLanguage = "PHiddles could not be deleted successfully.";
-		}
-		$.jGrowl(data.failed+" "+errorLanguage, {theme: "jgrowl_error"});
+		$.jGrowl(lang.error_delete_fail_generic.replace("{1}", data.failed), {theme: "jgrowl_error"});
 	}
 
+	/**
+	 * send request on import button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function importOnClick(e) {
 		e.preventDefault();
 
@@ -306,16 +438,22 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * send request on form submit button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function importOnSubmit(e) {
 		var data = new FormData();
-		
+
 		e.preventDefault();
 
-		data.append('file', $("#fileData").prop("files")[0]);
+		data.append("file", $("#fileData").prop("files")[0]);
 
 		$.ajax({
 			type: "post",
-			url: $("#modal_form").attr("action") + "&mode=ajax",
+			url: $("#modal_form").attr("action")+"&mode=ajax",
 			cache: false,
 			contentType: false,
 			processData: false,
@@ -325,16 +463,28 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * import the project
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function importOnSuccess(data) {
 		$.modal.close();
 
 		if (data.success) {
-			$.jGrowl("PHiddle imported.", {theme: "jgrowl_success"});
+			$.jGrowl(lang.success_import_phiddle, {theme: "jgrowl_success"});
 		} else {
-			$.jGrowl("PHiddle could not be imported successfully.", {theme: "jgrowl_error"});
+			$.jGrowl(lang.error_import_fail, {theme: "jgrowl_error"});
 		}
 	}
 
+	/**
+	 * send request on preview button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function previewOnClick(e) {
 		e.preventDefault();
 
@@ -351,19 +501,37 @@ var DevTools = (function($, dt) {
 		});
 	}
 
+	/**
+	 * start the preview
+	 *
+	 * @param  Object data
+	 * @return void
+	 */
 	function previewOnSuccess(data) {
 		tabs.show("output");
 		$("#output_frame").prop("src", data.url);
 
-		$.jGrowl("PHiddle launched.", {theme: "jgrowl_success"});
+		$.jGrowl(lang.success_preview, {theme: "jgrowl_success"});
 	}
 
+	/**
+	 * close the modal on cancel button click
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function cancelOnClick(e) {
 		e.preventDefault();
 
 		$.modal.close();
 	}
 
+	/**
+	 * clear the editor and reset project data
+	 *
+	 * @param  Boolean true to preserve the current editor data
+	 * @return void
+	 */
 	function clear(keepCode) {
 		if (!keepCode) {
 			Editor.setValue("");
@@ -378,20 +546,33 @@ var DevTools = (function($, dt) {
 		projectId = 0;
 	}
 
+	/**
+	 * retitle the page
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function setPageTitle(title) {
 		if (!title) {
-			projectTitle = '';
-			title = '[New PHiddle]';
+			projectTitle = "";
+			title = lang.default_title;
 		} else {
 			projectTitle = title;
 		}
 
-		document.title = "PHiddle — "+title;
+		document.title = lang.phiddle+" — "+title;
+		$("#phiddle_title h1").html(title);
 	}
 
+	/**
+	 * generic error->jGrowl
+	 *
+	 * @param  Object event
+	 * @return void
+	 */
 	function xmlhttpError(jqXHR, textStatus, errorThrown) {
 		console.log(jqXHR);
-		$.jGrowl(textStatus+": <br /><br />" + errorThrown, {theme: "jgrowl_error"});
+		$.jGrowl(textStatus+": <br /><br />"+errorThrown, {theme: "jgrowl_error"});
 	}
 
 	$(init);

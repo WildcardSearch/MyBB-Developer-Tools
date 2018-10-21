@@ -5,9 +5,14 @@ if (!defined('IN_MYBB')) {
 	die('Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.');
 }
 
-require_once MYBB_ROOT . 'inc/plugins/developer_tools/functions.php';
+require_once MYBB_ROOT.'inc/plugins/developer_tools/functions.php';
 define('DEVELOPER_TOOLS_URL', 'index.php?module=developer_tools');
 
+/**
+ * meta info
+ *
+ * @return bool
+ */
 function developer_tools_meta()
 {
 	global $page, $lang;
@@ -42,6 +47,12 @@ function developer_tools_meta()
 	return true;
 }
 
+/**
+ * action handler
+ *
+ * @param  string
+ * @return string url
+ */
 function developer_tools_action_handler($action)
 {
 	global $page;
@@ -56,6 +67,11 @@ function developer_tools_action_handler($action)
 	return 'index.php';
 }
 
+/**
+ * permissions
+ *
+ * @return array
+ */
 function developer_tools_admin_permissions()
 {
 	global $lang, $plugins;
@@ -69,18 +85,23 @@ function developer_tools_admin_permissions()
 	}
 
 	$admin_permissions = array(
-		"developer_tools" => $lang->developer_tools_admin_permissions_desc,
+		'developer_tools' => $lang->developer_tools_admin_permissions_desc,
 	);
 
 	foreach ((array) developerToolsGetAllModules() as $key => $module) {
 		$admin_permissions[$key] = $lang->sprintf($lang->developer_tools_page_permissions_desc, $module->get('title'));
 	}
 
-	$admin_permissions = $plugins->run_hooks("admin_developer_tools_permissions", $admin_permissions);
+	$admin_permissions = $plugins->run_hooks('admin_developer_tools_permissions', $admin_permissions);
 
-	return array("name" => $lang->developer_tools, "permissions" => $admin_permissions, "disporder" => 100);
+	return array('name' => $lang->developer_tools, 'permissions' => $admin_permissions, 'disporder' => 100);
 }
 
+/**
+ * deternmine if the plugin is inactive
+ *
+ * @return bool
+ */
 function developerToolsInactive()
 {
 	global $cache;

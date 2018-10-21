@@ -1,4 +1,4 @@
-# MyBB-Developer-Tools 0.0.4
+# MyBB-Developer-Tools 0.1 Beta
 *a MyBB module for developers with a collection of useful tools that is expansible and extensible*
 
 **This plugin is a development tool and therefore should not be used carelessly. Do not use this plugin on a live forum unless you understand the risks and are prepared to deal with the consequences.**

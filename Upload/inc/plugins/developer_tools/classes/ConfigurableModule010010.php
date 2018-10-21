@@ -1,10 +1,7 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
- * Copyright 2018 WildcardSearch
- * http://www.rantcentralforums.com
- *
- * module wrapper
+ * Wildcard Helper Classes
+ * ConfigurableModule Class Structure
  */
 
 abstract class ConfigurableModule010010 extends ExternalModule020000 implements ConfigurableModuleInterface010000
@@ -56,8 +53,8 @@ abstract class ConfigurableModule010010 extends ExternalModule020000 implements 
 		$elementName = "{$setting['name']}";
 		$elementId = "setting_{$setting['name']}";
 
-		$label = '<strong>' . htmlspecialchars_uni($setting['title']) . '</strong>';
-		$description = '<i>' . $setting['description'] . '</i>';
+		$label = '<strong>'.htmlspecialchars_uni($setting['title']).'</strong>';
+		$description = '<i>'.$setting['description'].'</i>';
 
 		if ($type[0] == 'text' ||
 			$type[0] == '') {
@@ -81,17 +78,17 @@ abstract class ConfigurableModule010010 extends ExternalModule020000 implements 
 		} else if ($type[0] == 'textarea') {
 			$code = $form->generate_text_area($elementName, $setting['value'], array('id' => $elementId));
 		} else if ($type[0] == 'yesno') {
-			$code = $form->generate_yes_no_radio($elementName, $setting['value'], true, array('id' => $elementId . '_yes', 'class' => $elementId), array('id' => $elementId . '_no', 'class' => $elementId));
+			$code = $form->generate_yes_no_radio($elementName, $setting['value'], true, array('id' => $elementId.'_yes', 'class' => $elementId), array('id' => $elementId.'_no', 'class' => $elementId));
 		} else if ($type[0] == 'onoff') {
-			$code = $form->generate_on_off_radio($elementName, $setting['value'], true, array('id' => $elementId . '_on', 'class' => $elementId), array('id' => $elementId . '_off', 'class' => $elementId));
+			$code = $form->generate_on_off_radio($elementName, $setting['value'], true, array('id' => $elementId.'_on', 'class' => $elementId), array('id' => $elementId.'_off', 'class' => $elementId));
 		} else if ($type[0] == 'cpstyle') {
-			$dir = @opendir(MYBB_ADMIN_DIR . 'styles');
+			$dir = @opendir(MYBB_ADMIN_DIR.'styles');
 
 			$folders = array();
 			while ($folder = readdir($dir)) {
 				if ($file != '.' &&
 					$file != '..' &&
-					@file_exists(MYBB_ADMIN_DIR . "styles/{$folder}/main.css")) {
+					@file_exists(MYBB_ADMIN_DIR."styles/{$folder}/main.css")) {
 					$folders[$folder] = ucfirst($folder);
 				}
 			}
@@ -145,7 +142,7 @@ abstract class ConfigurableModule010010 extends ExternalModule020000 implements 
 					<table cellpadding=\"4\">
 						<tr>
 							<td valign=\"top\"><small>{$lang->forums_colon}</small></td>
-							<td>" . $form->generate_forum_select('select['.$setting['name'].'][]', $selected, array('id' => $elementId, 'multiple' => true, 'size' => 5)) . "</td>
+							<td>".$form->generate_forum_select('select['.$setting['name'].'][]', $selected, array('id' => $elementId, 'multiple' => true, 'size' => 5))."</td>
 						</tr>
 					</table>
 				</dd>
@@ -250,7 +247,7 @@ abstract class ConfigurableModule010010 extends ExternalModule020000 implements 
 			$optionList = array();
 		}
 
-		$formContainer->output_row($label, $description, $code, '', array(), array('id' => 'row_' . $elementId));
+		$formContainer->output_row($label, $description, $code, '', array(), array('id' => 'row_'.$elementId));
 	}
 
 	/**

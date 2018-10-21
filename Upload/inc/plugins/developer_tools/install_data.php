@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -16,11 +16,11 @@ $tables = array(
 			'dateline' => 'INT NOT NULL, PRIMARY KEY(id)',
 		),
 	),
-	"phiddles" => array(
-		"id" => 'INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY',
-		"title" => 'VARCHAR(32) NOT NULL',
-		"content" => 'TEXT',
-		"dateline" => 'INT(10)',
+	'phiddles' => array(
+		'id' => 'INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY',
+		'title' => 'VARCHAR(32) NOT NULL',
+		'content' => 'TEXT',
+		'dateline' => 'INT(10)',
 	),
 );
 
@@ -47,10 +47,10 @@ $settings = array(
 );
 
 $styleSheets = array(
-	"folder" => 'developer_tools',
-	"acp" => array(
-		"global" => array(
-			"stylesheet" => <<<EOF
+	'folder' => 'developer_tools',
+	'acp' => array(
+		'global' => array(
+			'stylesheet' => <<<EOF
 /*
  * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
@@ -60,7 +60,7 @@ $styleSheets = array(
  */
 
 iframe.outputFrame {
-	height: 500px;
+	height: 700px;
 	width: 100%;
 	overflow-y: auto;
 }
@@ -90,8 +90,8 @@ iframe {
 }
 EOF
 		),
-		"tabs" => array(
-			"stylesheet" => <<<EOF
+		'tabs' => array(
+			'stylesheet' => <<<EOF
 /*
  * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch

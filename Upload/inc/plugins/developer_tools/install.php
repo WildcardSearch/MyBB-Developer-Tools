@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -20,7 +20,7 @@ if (!defined('IN_MYBB')) {
  */
 function developer_tools_info()
 {
-	global $db, $lang, $mybb, $cp_style;
+	global $lang, $cp_style;
 
 	if (!$lang->developer_tools) {
 		$lang->load('developer_tools');
@@ -79,7 +79,7 @@ EOF;
         'author' => $author,
         'authorsite' => 'http://www.rantcentralforums.com/',
 		'compatibility' => '18*',
-		"codename" => 'developer_tools',
+		'codename' => 'developer_tools',
     );
 }
 
@@ -181,7 +181,7 @@ function developerToolsGetSettingsgroup()
 		global $db;
 
 		// otherwise we will have to query the db
-		$query = $db->simple_select("settinggroups", "gid", "name='developer_tools_settings'");
+		$query = $db->simple_select('settinggroups', 'gid', "name='developer_tools_settings'");
 		$gid = (int) $db->fetch_field($query, 'gid');
 	}
 	return $gid;
@@ -190,7 +190,7 @@ function developerToolsGetSettingsgroup()
 /**
  * builds the URL to modify plugin settings if given valid info
  *
- * @param - $gid is an integer representing a valid settings group id
+ * @param  int group id
  * @return string setting group URL
  */
 function developerToolsBuildSettingsURL($gid)
@@ -234,13 +234,14 @@ EOF;
 /**
  * check plugin requirements and display warnings as appropriate
  *
+ * @param  bool
  * @return string warning text
  */
 function developerToolsCheckRequirements($deep = false)
 {
 	global $lang;
 
-	$adminStatus = is_writable(MYBB_ADMIN_DIR . 'styles/');
+	$adminStatus = is_writable(MYBB_ADMIN_DIR.'styles/');
 	if ($deep !== true &&
 		$adminStatus) {
 		return;
@@ -248,11 +249,11 @@ function developerToolsCheckRequirements($deep = false)
 
 	$issues = '';
 	if (!$adminStatus) {
-		$issues .= '<br /><span style="font-family: Courier New; font-weight: bolder; font-size: small; color: black;">' . MYBB_ADMIN_DIR . 'styles/</span>';
+		$issues .= '<br /><span style="font-family: Courier New; font-weight: bolder; font-size: small; color: black;">'.MYBB_ADMIN_DIR.'styles/</span>';
 	}
 
 	if ($deep) {
-		$adminSubStatus = developerToolsIsWritable(MYBB_ADMIN_DIR . 'styles/');
+		$adminSubStatus = developerToolsIsWritable(MYBB_ADMIN_DIR.'styles/');
 
 		if ($adminStatus &&
 			$adminSubStatus) {
@@ -260,7 +261,7 @@ function developerToolsCheckRequirements($deep = false)
 		}
 
 		if (!$adminSubStatus) {
-			$issues .= "<br /><span>{$lang->sprintf($lang->developer_tools_subfolders_unwritable, MYBB_ADMIN_DIR . 'styles/</span>')}";
+			$issues .= "<br /><span>{$lang->sprintf($lang->developer_tools_subfolders_unwritable, MYBB_ADMIN_DIR.'styles/</span>')}";
 		}
 		return "{$lang->developer_tools_folders_requirement_warning}<br />{$issues}";
 	}
@@ -285,8 +286,8 @@ function developerToolsIsWritable($rootFolder)
 			continue;
 		}
 
-		if (!is_writeable($rootFolder . $folder . "/") ||
-			!developerToolsIsWritable($rootFolder . $folder . "/")) {
+		if (!is_writeable($rootFolder.$folder.'/') ||
+			!developerToolsIsWritable($rootFolder.$folder.'/')) {
 			return false;
 		}
 	}

@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *

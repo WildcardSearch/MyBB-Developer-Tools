@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Picture Perfect for MyBB 1.8.x
+ * Plugin Name: Developer Tools for MyBB 1.8.x
  * Copyright 2018 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -54,6 +54,18 @@ EOF
 				'optionscode' => 'forumselectsingle',
 				'value' => '2',
 			),
+			'image_folder' => array(
+				'title' => $lang->developer_tools_create_threads_image_folder_title,
+				'description' => $lang->developer_tools_create_threads_image_folder_desc,
+				'optionscode' => 'text',
+				'value' => '',
+			),
+			'use_banned_members' => array(
+				'title' => $lang->developer_tools_create_threads_use_banned_members_title,
+				'description' => $lang->developer_tools_create_threads_use_banned_members_desc,
+				'optionscode' => 'yesno',
+				'value' => '0',
+			),
 		),
 	);
 }
@@ -74,7 +86,7 @@ function developer_tools_create_threads_execute($settings)
 	$threadCount = (int) $settings['threadcount'];
 	$postCount = (int) ($settings['postcount'] + 1);
 	$totalUsers = (int) $threadCount + $postCount;
-	developerToolsCreateThreadsGetRandomUser($totalUsers);
+	developerToolsCreateThreadsGetRandomUser($settings['use_banned_members'], $totalUsers);
 
 	$fid = (int) $settings['fid'];
 
@@ -93,7 +105,7 @@ function developer_tools_create_threads_execute($settings)
 	$td = TIME_NOW - $totalUsers;
 	for ($t = 1; $t <= $threadCount; $t++) {
 		$subject = ucwords($li->words(rand(1, 3)));
-		$tid = developer_tools_create_threads_my_create_thread($fid, $subject, $td++);
+		$tid = developer_tools_create_threads_my_create_thread($fid, $subject, $td++, $settings);
 
 		if ($tid == false) {
 			$t--;
@@ -107,7 +119,7 @@ function developer_tools_create_threads_execute($settings)
 			if (!$postMessage) {
 				$postMessage = 'Generic Message #'.$p;
 			}
-			$pid = developer_tools_create_threads_my_create_post($tid, $fid, $subject, $postMessage, $d++);
+			$pid = developer_tools_create_threads_my_create_post($tid, $fid, $subject, $postMessage, $d++, $settings);
 			if ($pid == false) {
 				$p--;
 				continue;
@@ -124,11 +136,19 @@ function developer_tools_create_threads_execute($settings)
 	admin_redirect($html->url());
 }
 
-function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $dateline)
+/**
+ * create a single thread per parameters
+ *
+ * @param  int
+ * @param  string
+ * @param  int
+ * @return int tid
+ */
+function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $dateline, $settings)
 {
 	global $mybb, $session, $li;
 
-	$user = developerToolsCreateThreadsGetRandomUser();
+	$user = developerToolsCreateThreadsGetRandomUser($settings['use_banned_members']);
 
 	// Set up posthandler.
 	require_once MYBB_ROOT."inc/datahandlers/post.php";
@@ -136,32 +156,117 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 	$posthandler->action = "thread";
 
 	// Set the thread data that came from the input to the $thread array.
-	$new_thread = array(
+	$newThread = array(
 		"fid" => $fid,
 		"subject" => $subject,
 		"uid" => $user['uid'],
 		"username" => $user['username'],
-		"message" => $li->paragraphs(rand(1, 10)),
+		"message" => developerToolsGetMessage($settings),
 		"ipaddress" => $session->packedip,
 		"dateline" => $dateline,
 	);
 
-	$posthandler->set_data($new_thread);
+	$posthandler->set_data($newThread);
 	if ($posthandler->validate_thread() == false) {
-		//die(var_dump($new_thread));
 		return false;
 	}
-	$thread_info = $posthandler->insert_thread();
-	$tid = $thread_info['tid'];
+	$threadInfo = $posthandler->insert_thread();
+	$tid = $threadInfo['tid'];
 
 	return $tid;
 }
 
-function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $message, $dateline)
+/**
+ * get a random lorem ispsum message and image if applicable
+ *
+ * @param  array module settings
+ * @return string message
+ */
+function developerToolsGetMessage($settings)
+{
+	global $mybb, $li;
+
+	// clean up the image folder
+	$imageFolder = trim($settings['image_folder']);
+
+	if (substr($imageFolder, strlen($imageFolder) - 1) == '/') {
+		$imageFolder = substr($imageFolder, 0, strlen($imageFolder) - 1);
+	}
+
+	if (substr($imageFolder, 0, 1) == '/') {
+		$imageFolder = substr($imageFolder, 1);
+	}
+
+	// add a random image if available
+	$message = '';
+	if ($imageFolder &&
+		file_exists(MYBB_ROOT.$imageFolder)) {
+		$imageFile = developerToolsGetImage(MYBB_ROOT.$imageFolder);
+		if ($imageFile) {
+			$image = $mybb->settings['bburl']."/{$imageFolder}/".$imageFile;
+		}
+
+		if ($image) {
+			$message = "[img]{$image}[/img]\n\n";
+		}
+	}
+
+	// add some random paragraphs
+	$message .= $li->paragraphs(rand(1, 10));
+
+	return $message;
+}
+
+/**
+ * get a random lorem ispsum message and image if applicable
+ *
+ * @param  string relative folder path
+ * @return string file path
+ */
+function developerToolsGetImage($imageFolder)
+{
+	static $imageList = null;
+
+	// only build the image cache once
+	if (!isset($imageList)) {
+		$imageList = array();
+		foreach (new DirectoryIterator($imageFolder) as $file) {
+			if (!$file->isFile() ||
+				$file->isDot() ||
+				$file->isDir()) {
+				continue;
+			}
+
+			$extension = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
+
+			// only PHP files
+			if (!in_array($extension, array('gif', 'png', 'jpg', 'jpeg', 'bmp'))) {
+				continue;
+			}
+
+			// attempt to load the module
+			$imageList[] = $file->getFilename();
+		}
+	}
+
+	return $imageList[rand(0, count($imageList)-1)];
+}
+
+/**
+ * create a single post per parameters
+ *
+ * @param  int
+ * @param  int
+ * @param  string
+ * @param  string
+ * @param  int
+ * @return int pid
+ */
+function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $message, $dateline, $settings)
 {
 	global $mybb, $session;
 
-	$user = developerToolsCreateThreadsGetRandomUser();
+	$user = developerToolsCreateThreadsGetRandomUser($settings['use_banned_members']);
 
 	// Set up posthandler.
 	require_once MYBB_ROOT."inc/datahandlers/post.php";
@@ -174,7 +279,7 @@ function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $me
 		"subject" => $subject,
 		"uid" => $user['uid'],
 		"username" => $user['username'],
-		"message" => $message,
+		"message" => developerToolsGetMessage($settings),
 		"ipaddress" => $session->packedip,
 		"dateline" => $dateline,
 	);
@@ -190,20 +295,45 @@ function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $me
 	return $postinfo['pid'];
 }
 
-function developerToolsCreateThreadsGetRandomUser($totalUsers=null)
+/**
+ * retrieve a random forum user
+ *
+ * @param  int|null
+ * @return int pid
+ */
+function developerToolsCreateThreadsGetRandomUser($useBannedMembers=false, $totalUsers=null)
 {
 	global $db;
 
 	static $users, $total;
 
-	$randFunction = 'RAND()';
-	if ($db->engine == 'pgsql') {
-		$randFunction = 'RANDOM()';
-	}
-
 	if (!isset($users)) {
+		$randFunction = 'RAND()';
+		if ($db->engine == 'pgsql') {
+			$randFunction = 'RANDOM()';
+		}
+
+		$where = '';
+		if (!$useBannedMembers) {
+			$bannedGroups = array();
+			$query = $db->simple_select('usergroups', '*', 'isbannedgroup=1');
+			while ($gid = $db->fetch_field($query, 'gid')) {
+				$bannedGroups[] = $gid;
+			}
+
+			if (is_array($bannedGroups) &&
+				!empty($bannedGroups)) {
+				if (count($bannedGroups) > 1) {
+					$bannedList = implode(',', $bannedGroups);
+					$where = "usergroup NOT IN({$bannedList})";
+				} elseif (count($bannedGroups) == 1) {
+					$where = "usergroup !='{$bannedGroups[0]}'";
+				}
+			}
+		}
+
 		$total = (int) $totalUsers;
-		$query = $db->simple_select('users', 'username,uid', '', array("order_by" => $randFunction, "limit" => $total));
+		$query = $db->simple_select('users', 'username,uid', $where, array('order_by' => $randFunction, 'limit' => $total));
 		while ($user = $db->fetch_array($query)) {
 			$users[] = $user;
 		}
@@ -212,6 +342,7 @@ function developerToolsCreateThreadsGetRandomUser($totalUsers=null)
 	if ($totalUsers !== null) {
 		return;
 	}
+
 	return $users[(int) rand(0, $total - 1)];
 }
 

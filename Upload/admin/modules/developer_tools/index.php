@@ -163,7 +163,7 @@ function developerToolsPHiddle()
 			if ($phiddle->isValid()) {
 				developerToolsSaveProject();
 			} else {
-				developerToolsSaveProjectAs();
+				developerToolsSaveAsProject();
 			}
 		} elseif (isset($mybb->input['save_phiddle'])) {
 			if ($phiddle->isValid()) {
@@ -184,7 +184,7 @@ function developerToolsPHiddle()
 			flash_message($lang->developer_tools_success_save_phiddle, 'success');
 			admin_redirect($html->url());
 		} elseif (isset($mybb->input['saveAsButton'])) {
-			developerToolsSaveProjectAs();
+			developerToolsSaveAsProject();
 		} elseif (isset($mybb->input['deleteButton'])) {
 			developerToolsDeleteProject();
 		} elseif (isset($mybb->input['previewButton'])) {

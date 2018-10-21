@@ -219,7 +219,7 @@ function developerToolsSaveProject($ajax=false, $new=false)
  * @param  bool
  * @return void
  */
-function developerToolsSaveProjectAs($ajax=false)
+function developerToolsSaveAsProject($ajax=false)
 {
 	global $mybb, $page, $lang, $html, $myCache;
 

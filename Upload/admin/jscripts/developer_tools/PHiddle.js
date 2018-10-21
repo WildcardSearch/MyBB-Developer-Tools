@@ -35,6 +35,7 @@ var DevTools = (function($, dt) {
 		error_no_phiddles: "There are no saved Phiddles to load.",
 		success_save_phiddle: "Phiddle saved successfully.",
 		error_delete_fail_generic: "{1} PHiddle(s) could not be successfully deleted.",
+		error_delete_no_phiddles: "There are no saved Phiddles to delete.",
 		success_delete_phiddle_generic: "{1} PHiddle(s) successfully deleted.",
 		success_import_phiddle: "PHiddle successfully imported.",
 		error_import_fail: "PHiddle could not be imported successfully.",
@@ -359,6 +360,11 @@ var DevTools = (function($, dt) {
 		e.preventDefault();
 
 		$.get(url+"&mode=ajax&action=delete", function(html) {
+			if (!html) {
+				$.jGrowl(lang.error_delete_no_phiddles, { theme: 'jgrowl_error' });
+				return;
+			}
+
 			$(html).appendTo("body").modal({
 				fadeDuration: 250,
 				zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),

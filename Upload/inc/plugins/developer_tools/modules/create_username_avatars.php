@@ -90,11 +90,12 @@ function developer_tools_create_username_avatars_execute($settings)
 			admin_redirect($html->url());
 		}
 		$filename = "{$path}/avatar_{$uid}.png";
+
 		imagepng($im, $filename);
 		imagedestroy($im);
 
 		$updatedAvatar = array(
-			'avatar' => $db->escape_string('./'.$filename.'?dateline='.TIME_NOW),
+			'avatar' => $db->escape_string("./uploads/avatars/avatar_{$uid}.png?dateline=".TIME_NOW),
 			'avatardimensions' => '100|100',
 			'avatartype' => 'remote',
 		);

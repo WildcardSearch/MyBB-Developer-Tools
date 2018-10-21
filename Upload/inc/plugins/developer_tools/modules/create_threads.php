@@ -58,7 +58,13 @@ EOF
 				'title' => $lang->developer_tools_create_threads_image_folder_title,
 				'description' => $lang->developer_tools_create_threads_image_folder_desc,
 				'optionscode' => 'text',
-				'value' => 'images/1061',
+				'value' => '',
+			),
+			'use_banned_members' => array(
+				'title' => $lang->developer_tools_create_threads_use_banned_members_title,
+				'description' => $lang->developer_tools_create_threads_use_banned_members_desc,
+				'optionscode' => 'yesno',
+				'value' => '0',
 			),
 		),
 	);
@@ -80,7 +86,7 @@ function developer_tools_create_threads_execute($settings)
 	$threadCount = (int) $settings['threadcount'];
 	$postCount = (int) ($settings['postcount'] + 1);
 	$totalUsers = (int) $threadCount + $postCount;
-	developerToolsCreateThreadsGetRandomUser($totalUsers);
+	developerToolsCreateThreadsGetRandomUser($settings['use_banned_members'], $totalUsers);
 
 	$fid = (int) $settings['fid'];
 
@@ -142,7 +148,7 @@ function developer_tools_create_threads_my_create_thread($fid = 2, $subject, $da
 {
 	global $mybb, $session, $li;
 
-	$user = developerToolsCreateThreadsGetRandomUser();
+	$user = developerToolsCreateThreadsGetRandomUser($settings['use_banned_members']);
 
 	// Set up posthandler.
 	require_once MYBB_ROOT."inc/datahandlers/post.php";
@@ -260,7 +266,7 @@ function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $me
 {
 	global $mybb, $session;
 
-	$user = developerToolsCreateThreadsGetRandomUser();
+	$user = developerToolsCreateThreadsGetRandomUser($settings['use_banned_members']);
 
 	// Set up posthandler.
 	require_once MYBB_ROOT."inc/datahandlers/post.php";
@@ -295,20 +301,39 @@ function developer_tools_create_threads_my_create_post($tid, $fid, $subject, $me
  * @param  int|null
  * @return int pid
  */
-function developerToolsCreateThreadsGetRandomUser($totalUsers=null)
+function developerToolsCreateThreadsGetRandomUser($useBannedMembers=false, $totalUsers=null)
 {
 	global $db;
 
 	static $users, $total;
 
-	$randFunction = 'RAND()';
-	if ($db->engine == 'pgsql') {
-		$randFunction = 'RANDOM()';
-	}
-
 	if (!isset($users)) {
+		$randFunction = 'RAND()';
+		if ($db->engine == 'pgsql') {
+			$randFunction = 'RANDOM()';
+		}
+
+		$where = '';
+		if (!$useBannedMembers) {
+			$bannedGroups = array();
+			$query = $db->simple_select('usergroups', '*', 'isbannedgroup=1');
+			while ($gid = $db->fetch_field($query, 'gid')) {
+				$bannedGroups[] = $gid;
+			}
+
+			if (is_array($bannedGroups) &&
+				!empty($bannedGroups)) {
+				if (count($bannedGroups) > 1) {
+					$bannedList = implode(',', $bannedGroups);
+					$where = "usergroup NOT IN({$bannedList})";
+				} elseif (count($bannedGroups) == 1) {
+					$where = "usergroup !='{$bannedGroups[0]}'";
+				}
+			}
+		}
+
 		$total = (int) $totalUsers;
-		$query = $db->simple_select('users', 'username,uid', '', array("order_by" => $randFunction, "limit" => $total));
+		$query = $db->simple_select('users', 'username,uid', $where, array('order_by' => $randFunction, 'limit' => $total));
 		while ($user = $db->fetch_array($query)) {
 			$users[] = $user;
 		}
@@ -317,6 +342,7 @@ function developerToolsCreateThreadsGetRandomUser($totalUsers=null)
 	if ($totalUsers !== null) {
 		return;
 	}
+
 	return $users[(int) rand(0, $total - 1)];
 }
 

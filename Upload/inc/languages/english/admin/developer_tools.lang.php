@@ -155,6 +155,9 @@ $l['developer_tools_create_threads_fid_desc'] = 'select the forum in which to cr
 $l['developer_tools_create_threads_image_folder_title'] = 'Post Images?';
 $l['developer_tools_create_threads_image_folder_desc'] = 'include a folder, relative to the forum root and images will be randomly posted from with that folder';
 
+$l['developer_tools_create_threads_use_banned_members_title'] = 'Use Banned Members?';
+$l['developer_tools_create_threads_use_banned_members_desc'] = 'YES to also use banned members as thread authors, NO (default) to only use unbanned members';
+
 $l['developer_tools_create_threads_success_message'] = 'Created {1} thread(s) and {2} post(s)';
 
 $l['developer_tools_create_threads_error_message_no_forum'] = 'Forum doesn\'t exist!';

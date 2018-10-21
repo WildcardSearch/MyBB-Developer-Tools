@@ -112,15 +112,7 @@ abstract class ExternalModule020000 extends MalleableObject010000 implements Ext
 
 		array_shift($args);
 
-		$a = array();
-		for ($c = 0; $c < 9; $c++) {
-			if (isset($args[$c])) {
-				$a[$c] = $args[$c];
-			} else {
-				$a[$c] = '';
-			}
-		}
-		return $this_function($a[0], $a[1], $a[2], $a[3], $a[4], $a[5], $a[6], $a[7], $a[8], $a[9]);
+		return call_user_func_array($this_function, $args);
 	}
 
 	/**

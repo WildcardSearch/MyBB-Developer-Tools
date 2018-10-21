@@ -32,6 +32,7 @@ var DevTools = (function($, dt) {
 	lang = {
 		success_code_cleared: "Project code cleared.",
 		success_load_generic: "PHiddle successfully loaded.",
+		error_no_phiddles: "There are no saved Phiddles to load.",
 		success_save_phiddle: "Phiddle saved successfully.",
 		error_delete_fail_generic: "{1} PHiddle(s) could not be successfully deleted.",
 		success_delete_phiddle_generic: "{1} PHiddle(s) successfully deleted.",
@@ -194,6 +195,11 @@ var DevTools = (function($, dt) {
 		e.preventDefault();
 
 		$.get(url+"&mode=ajax&action=load", function(html) {
+			if (!html) {
+				$.jGrowl(lang.error_no_phiddles, { theme: 'jgrowl_error' });
+				return;
+			}
+
 			$(html).appendTo("body").modal({
 				fadeDuration: 250,
 				zIndex: (typeof modal_zindex !== "undefined" ? modal_zindex : 9999),

@@ -254,6 +254,7 @@ function developerToolsPHiddle()
 	}, {
 		success_code_cleared: "{$lang->developer_tools_success_code_cleared}",
 		success_load_generic: "{$lang->developer_tools_success_load_generic}",
+		error_no_phiddles: "{$lang->developer_tools_error_load_no_phiddles}",
 		success_save_phiddle: "{$lang->developer_tools_success_save_phiddle}",
 		error_delete_fail_generic: "{$lang->developer_tools_error_delete_fail_generic}",
 		success_delete_phiddle_generic: "{$lang->developer_tools_success_delete_phiddle_generic}",

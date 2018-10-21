@@ -242,7 +242,6 @@ function developerToolsPHiddle()
 	<script src="./jscripts/codemirror/addon/search/match-highlighter.js"></script>
 	<script src="./jscripts/developer_tools/codemirror/addon/comment/continuecomment.js"></script>
 	<script src="./jscripts/developer_tools/codemirror/addon/display/fullscreen.js"></script>
-	<script src="./jscripts/developer_tools/codemirror/addon/display/panel.js"></script>
 
 	<script src="./jscripts/developer_tools/tabs.js"></script>
 	<script src="./jscripts/developer_tools/PHiddle.js"></script>
@@ -364,20 +363,20 @@ EOF;
 
 	echo <<<EOF
 
+	<div id="toolBarContainer">
+		<span id="toolBar" class="toolBar">
+			<input type="submit" value=" " id="newButton" name="newButton" class="toolbarButton newButton" title="{$lang->developer_tools_toolbar_button_new_title}"/>
+			<input type="submit" value=" " id="loadButton" name="loadButton" class="toolbarButton loadButton" title="{$lang->developer_tools_toolbar_button_load_title}"/>
+			<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="{$lang->developer_tools_toolbar_button_save_title}" disabled />
+			<input type="submit" value=" " id="saveAsButton" name="saveAsButton" class="toolbarButton saveAsButton" title="{$lang->developer_tools_toolbar_button_save_as_title}"/>
+			<input type="submit" value=" " id="deleteButton" name="deleteButton" class="toolbarButton deleteButton" title="{$lang->developer_tools_toolbar_button_delete_title}"/>
+			<input type="submit" value=" " id="importButton" name="importButton" class="toolbarButton importButton" title="{$lang->developer_tools_toolbar_button_import_title}"/>
+			<input type="submit" value=" " id="exportButton" name="exportButton" class="toolbarButton exportButton" title="{$lang->developer_tools_toolbar_button_export_title}"/>
+			<input type="submit" value=" " id="previewButton" name="previewButton" class="toolbarButton previewButton" title="{$lang->developer_tools_toolbar_button_preview_title}"/>
+			<input type="hidden" id="hiddenId" name="id"/>
+		</span>
+	</div>
 	<div id="qt_body_main_php" name="php" class="quick_tab">
-		<div id="toolBarContainer">
-			<span id="toolBar" class="toolBar">
-				<input type="submit" value=" " id="newButton" name="newButton" class="toolbarButton newButton" title="{$lang->developer_tools_toolbar_button_new_title}"/>
-				<input type="submit" value=" " id="loadButton" name="loadButton" class="toolbarButton loadButton" title="{$lang->developer_tools_toolbar_button_load_title}"/>
-				<input type="submit" value=" " id="saveButton" name="saveButton" class="toolbarButton saveButton" title="{$lang->developer_tools_toolbar_button_save_title}" disabled />
-				<input type="submit" value=" " id="saveAsButton" name="saveAsButton" class="toolbarButton saveAsButton" title="{$lang->developer_tools_toolbar_button_save_as_title}"/>
-				<input type="submit" value=" " id="deleteButton" name="deleteButton" class="toolbarButton deleteButton" title="{$lang->developer_tools_toolbar_button_delete_title}"/>
-				<input type="submit" value=" " id="importButton" name="importButton" class="toolbarButton importButton" title="{$lang->developer_tools_toolbar_button_import_title}"/>
-				<input type="submit" value=" " id="exportButton" name="exportButton" class="toolbarButton exportButton" title="{$lang->developer_tools_toolbar_button_export_title}"/>
-				<input type="submit" value=" " id="previewButton" name="previewButton" class="toolbarButton previewButton" title="{$lang->developer_tools_toolbar_button_preview_title}"/>
-				<input type="hidden" id="hiddenId" name="id"/>
-			</span>
-		</div>
 EOF;
 
 	echo($form->generate_text_area('php_code', $phpCode | ' ', array('rows' => 11, 'columns' => 145, 'id' => 'php_code')));

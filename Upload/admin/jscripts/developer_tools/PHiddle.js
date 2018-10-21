@@ -109,7 +109,6 @@ var DevTools = (function($, dt) {
 
 		mirror = Editor.getValue();
 
-		Editor.addPanel($("#toolBarContainer")[0]);
 		Editor.on("change", editorChanged);
 
 		$("#newButton").click(newOnClick);

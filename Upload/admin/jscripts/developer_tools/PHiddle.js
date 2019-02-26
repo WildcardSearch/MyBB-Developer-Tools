@@ -254,6 +254,7 @@ var DevTools = (function($, dt) {
 	function saveOnClick(e) {
 		if (!projectId) {
 			saveAsOnClick(e);
+			return;
 		}
 
 		e.preventDefault();

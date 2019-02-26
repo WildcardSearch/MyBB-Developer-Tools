@@ -207,6 +207,7 @@ var DevTools = (function($, dt) {
 
 			$("#modalSubmit").one("click", loadOnSubmit);
 			$("#modalCancel").one("click", cancelOnClick);
+			$("#phiddle_select").one("dblclick", loadOnSubmit);
 		});
 	}
 

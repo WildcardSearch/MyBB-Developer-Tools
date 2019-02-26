@@ -236,6 +236,7 @@ var DevTools = (function($, dt) {
 	 */
 	function loadOnSuccess(data) {
 		$.modal.close();
+		tabs.show("php");
 		projectId = data.id;
 		Editor.setValue(data.code);
 		mirror = data.code;

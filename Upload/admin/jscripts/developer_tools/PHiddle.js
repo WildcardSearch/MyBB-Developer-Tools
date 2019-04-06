@@ -241,9 +241,9 @@ var DevTools = (function($, dt) {
 		projectId = data.id;
 		Editor.setValue(data.code);
 		mirror = data.code;
+		editorChanged();
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
-		hasChanged = false;
 		$.jGrowl(lang.success_load_generic, {theme: "jgrowl_success"});
 	}
 
@@ -403,8 +403,8 @@ var DevTools = (function($, dt) {
 	 */
 	function deleteOnSuccess(data) {
 		if (data.deleted > 0 &&
-			data.deletedIds.length &&
-			data.deletedIds.indexOf(projectId) != -1) {
+			data.deletedIds.length > 0 &&
+			data.deletedIds.indexOf(projectId.toString()) != -1) {
 			clear(true);
 		}
 
@@ -536,14 +536,13 @@ var DevTools = (function($, dt) {
 	 * @return void
 	 */
 	function clear(keepCode) {
+		mirror = "";
+
 		if (!keepCode) {
 			Editor.setValue("");
-			mirror = "";
-			hasChanged = false;
-		} else {
-			hasChanged = true;
 		}
 
+		editorChanged();
 		Cookie.unset(cookieKey);
 		setPageTitle();
 		projectId = 0;

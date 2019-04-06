@@ -542,7 +542,10 @@ function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
 		$lang->load('developer_tools');
 	}
 
-	$query = $db->simple_select('phiddles', 'id,title');
+	$query = $db->simple_select('phiddles', 'id,title', '', array(
+		'order_by' => 'title',
+		'order_dir' => 'ASC, id ASC',
+	));
 	$count = $db->num_rows($query);
 	if ($count == 0) {
 		return false;

@@ -142,7 +142,7 @@ var DevTools = (function($, dt) {
 	 * @param  Object event
 	 * @return void
 	 */
-	function editorChanged(e) {
+	function editorChanged() {
 		if (Editor.getValue() !== mirror) {
 			$("#saveButton").prop("disabled", false);
 			hasChanged = true;
@@ -283,8 +283,8 @@ var DevTools = (function($, dt) {
 	 * @return void
 	 */
 	function saveOnSuccess(data) {
-		hasChanged = false;
 		mirror = Editor.getValue();
+		editorChanged();
 		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
 	}
 
@@ -347,8 +347,8 @@ var DevTools = (function($, dt) {
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
 		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
-		hasChanged = false;
 		mirror = Editor.getValue();
+		editorChanged();
 		$.modal.close();
 	}
 

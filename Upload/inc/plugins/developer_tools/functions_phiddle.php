@@ -24,11 +24,11 @@ function developerToolsWriteTemp($userCode)
 	$code = <<<EOF
 <?php
 
+ini_set('display_errors', '1');
+
 define('IN_MYBB', 1);
 define('NO_ONLINE', 1);
 require_once '../../../../../global.php';
-
-ini_set('display_errors', '1');
 
 {$userCode}
 
@@ -542,7 +542,10 @@ function developerToolsCreatePhiddleSelect($selected = '', $multi=false)
 		$lang->load('developer_tools');
 	}
 
-	$query = $db->simple_select('phiddles', 'id,title');
+	$query = $db->simple_select('phiddles', 'id,title', '', array(
+		'order_by' => 'title',
+		'order_dir' => 'ASC, id ASC',
+	));
 	$count = $db->num_rows($query);
 	if ($count == 0) {
 		return false;

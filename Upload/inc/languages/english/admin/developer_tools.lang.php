@@ -166,8 +166,8 @@ $l['developer_tools_create_threads_error_message_category'] = 'Categories are no
 // create_username_avatars
 $l['developer_tools_create_username_avatars_title'] = 'Create User Name Avatars';
 $l['developer_tools_create_username_avatars_description'] = 'create avatars for each user that have the user name in the image';
-$l['developer_tools_create_username_avatars_long_description_1'] = 'This module creates avatars for every user on the forum (except id=1) that have the user\'s name written across the image. This can prove useful when developing plugins that display user avatars in lieu of user names.';
-$l['developer_tools_create_username_avatars_long_description_2'] = 'The created images are 100px by 100px and are PNG images.';
+$l['developer_tools_create_username_avatars_long_description_1'] = 'This module creates avatars for every user on the forum that have the user\'s name or initials written across the image. This can prove useful when developing plugins that display user avatars in lieu of user names.';
+$l['developer_tools_create_username_avatars_long_description_2'] = 'The created images are 100x100 pixel PNG images.';
 $l['developer_tools_create_username_avatars_long_description_img_alt'] = 'example image';
 $l['developer_tools_create_username_avatars_long_description_img_title'] = 'example image; shown half size';
 
@@ -179,5 +179,22 @@ $l['developer_tools_create_username_avatars_success_message'] = 'Updated {1} ava
 $l['developer_tools_create_username_avatars_error_message_folder'] = 'Avatar folder doesn\'t exist and could not be created.';
 
 $l['developer_tools_create_username_avatars_error_message_no_users'] = 'The avatar assignment failed because there were no users. Note: The original account (id=1) will not be used.';
+
+	/* settings */
+
+$l['developer_tools_create_username_avatars_background_title'] = 'Background Type';
+$l['developer_tools_create_username_avatars_background_desc'] = 'choose the background type for avatar images';
+
+$l['developer_tools_create_username_avatars_background_color_title'] = 'Background Color';
+$l['developer_tools_create_username_avatars_background_color_desc'] = 'choose the background color for the avatar images';
+
+$l['developer_tools_create_username_avatars_display_title'] = 'Full Name?';
+$l['developer_tools_create_username_avatars_display_desc'] = 'true to show the full name, false (default) to show only initials';
+
+$l['developer_tools_create_username_avatars_color_title'] = 'Text Color';
+$l['developer_tools_create_username_avatars_color_desc'] = 'a hex string representing the color (eg. #ff00ff)';
+
+$l['developer_tools_create_username_avatars_shadow_title'] = 'Text Shadow Color';
+$l['developer_tools_create_username_avatars_shadow_desc'] = 'a hex string representing the color (eg. #ffff00)';
 
 ?>

@@ -142,7 +142,7 @@ var DevTools = (function($, dt) {
 	 * @param  Object event
 	 * @return void
 	 */
-	function editorChanged(e) {
+	function editorChanged() {
 		if (Editor.getValue() !== mirror) {
 			$("#saveButton").prop("disabled", false);
 			hasChanged = true;
@@ -207,6 +207,7 @@ var DevTools = (function($, dt) {
 
 			$("#modalSubmit").one("click", loadOnSubmit);
 			$("#modalCancel").one("click", cancelOnClick);
+			$("#phiddle_select").one("dblclick", loadOnSubmit);
 		});
 	}
 
@@ -236,12 +237,13 @@ var DevTools = (function($, dt) {
 	 */
 	function loadOnSuccess(data) {
 		$.modal.close();
+		tabs.show("php");
 		projectId = data.id;
 		Editor.setValue(data.code);
 		mirror = data.code;
+		editorChanged();
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
-		hasChanged = false;
 		$.jGrowl(lang.success_load_generic, {theme: "jgrowl_success"});
 	}
 
@@ -254,6 +256,7 @@ var DevTools = (function($, dt) {
 	function saveOnClick(e) {
 		if (!projectId) {
 			saveAsOnClick(e);
+			return;
 		}
 
 		e.preventDefault();
@@ -280,8 +283,8 @@ var DevTools = (function($, dt) {
 	 * @return void
 	 */
 	function saveOnSuccess(data) {
-		hasChanged = false;
 		mirror = Editor.getValue();
+		editorChanged();
 		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
 	}
 
@@ -344,8 +347,8 @@ var DevTools = (function($, dt) {
 		setPageTitle(data.title);
 		Cookie.set(cookieKey, projectId);
 		$.jGrowl(lang.success_save_phiddle, {theme: "jgrowl_success"});
-		hasChanged = false;
 		mirror = Editor.getValue();
+		editorChanged();
 		$.modal.close();
 	}
 
@@ -400,8 +403,8 @@ var DevTools = (function($, dt) {
 	 */
 	function deleteOnSuccess(data) {
 		if (data.deleted > 0 &&
-			data.deletedIds.length &&
-			data.deletedIds.indexOf(projectId) != -1) {
+			data.deletedIds.length > 0 &&
+			data.deletedIds.indexOf(projectId.toString()) != -1) {
 			clear(true);
 		}
 
@@ -533,14 +536,13 @@ var DevTools = (function($, dt) {
 	 * @return void
 	 */
 	function clear(keepCode) {
+		mirror = "";
+
 		if (!keepCode) {
 			Editor.setValue("");
-			mirror = "";
-			hasChanged = false;
-		} else {
-			hasChanged = true;
 		}
 
+		editorChanged();
 		Cookie.unset(cookieKey);
 		setPageTitle();
 		projectId = 0;

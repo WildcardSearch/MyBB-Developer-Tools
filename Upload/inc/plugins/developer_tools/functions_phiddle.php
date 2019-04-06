@@ -24,11 +24,11 @@ function developerToolsWriteTemp($userCode)
 	$code = <<<EOF
 <?php
 
+ini_set('display_errors', '1');
+
 define('IN_MYBB', 1);
 define('NO_ONLINE', 1);
 require_once '../../../../../global.php';
-
-ini_set('display_errors', '1');
 
 {$userCode}
 

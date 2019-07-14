@@ -180,6 +180,7 @@ var DevTools = (function($, dt) {
 	 * @return void
 	 */
 	function newOnSuccess() {
+		tabs.show("php");
 		clear();
 
 		$.jGrowl(lang.success_code_cleared, {theme: "jgrowl_success"});

@@ -7,7 +7,7 @@
  * this file contains an object wrapper for script definitons
  */
 
-class PhiddleProject extends PortableObject010101
+class PhiddleProject extends PortableObject010102
 {
 	/**
 	 * @var string
